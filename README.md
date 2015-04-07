@@ -3,10 +3,10 @@ Octo is a small and efficient text editor for the command line.
 
 ## Features:
 
- * Ed/ex - like syntax
+ * Ed-like syntax
  * Small and fast
  * Efficient 
- * Portability
+ * Portable
 
 ## Contribute
 
