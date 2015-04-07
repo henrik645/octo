@@ -10,8 +10,8 @@ Octo is a small and efficient text editor for the command line.
 
 ## Contribute
 
- * Issue tracker: github.com/henrik645/octo/issues
- * Source code: github.com/henrik645/octo
+ * Issue tracker: [http://github.com/henrik645/octo/issues](http://github.com/henrik645/octo/issues)
+ * Source code: [http:/github.com/henrik645/octo](http://github.com/henrik645/octo)
 
 ## License
 
