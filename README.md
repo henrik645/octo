@@ -1,6 +1,9 @@
 # octo
 Octo is a small and efficient text editor for the command line.
 
+The prototype is written in Python while the final product is intended to be
+written in C.
+
 ## Features:
 
  * Ed-like syntax
