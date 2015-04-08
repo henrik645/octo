@@ -1,0 +1,4 @@
+range = rangespec ',' rangespec
+rangespec = ¤ | NUMBER
+line = NUMBER
+command = range | line
