@@ -80,7 +80,6 @@ int parseCommands(char prompt) {
         for (i = 0; i < strlen(commandStr);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
             command = commandStr[i];
             parsedNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
-            strcpy(lineContents, buffer[line]);
             if (parsedNumber.value >= 0) { //Input is number
                 i += parsedNumber.size;
                 line = parsedNumber.value;
@@ -98,9 +97,10 @@ int parseCommands(char prompt) {
                     case 'c':
                         getchar(); //Flushes input buffer of newlines
                         fgets(lineContents, SCREEN_WIDTH, stdin);
-                        printf("%d\n", line);
+                        strcpy(buffer[line], lineContents);
                         break;
                     case 'p':
+                        strcpy(lineContents, buffer[line]);
                         printf("%s", lineContents);
                         break;
                     default:
@@ -109,7 +109,6 @@ int parseCommands(char prompt) {
                 }
                 i++;
             }
-            strcpy(buffer[line], lineContents);
         }
     }
     return 1;
