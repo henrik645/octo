@@ -14,6 +14,11 @@ struct number {
     int size;
 };
 
+struct range {
+    int start;
+    int end;
+};
+
 struct number parseInt(char input[], int inputLength, int inputOffset);
 int parseCommands(char prompt);
 
@@ -73,6 +78,8 @@ int parseCommands(char prompt) {
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
     char buffer[MAX_LINES][SCREEN_WIDTH];
+    int isRange = 0;
+    struct range range;
     
     while(1) {
         printf("%c", prompt);
@@ -82,6 +89,21 @@ int parseCommands(char prompt) {
             parsedNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
             if (parsedNumber.value >= 0) { //Input is number
                 i += parsedNumber.size;
+                if (commandStr[i] == ',') {
+                    i++; //Removes the ','
+                    struct number endNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
+                    i += endNumber.size - 2; //Minus two to account for a shift of one in parseInt
+                    if (endNumber.value >= 0) {
+                        isRange = 1;
+                        range.start = parsedNumber.value;
+                        range.end = endNumber.value;
+                    } else {
+                        printf("?\n");
+                        break;
+                    }
+                } else {
+                    isRange = 0;
+                }
                 line = parsedNumber.value;
             } else {
                 switch (command) {
@@ -100,8 +122,16 @@ int parseCommands(char prompt) {
                         strcpy(buffer[line], lineContents);
                         break;
                     case 'p':
-                        strcpy(lineContents, buffer[line]);
-                        printf("%s", lineContents);
+                        if (isRange) {
+                            isRange = 0;
+                            int x;
+                            for (x = range.start; x <= range.end; x++) {
+                                printf("%s", buffer[x]);
+                            }
+                        } else {
+                            strcpy(lineContents, buffer[line]);
+                            printf("%s", lineContents);
+                        }
                         break;
                     default:
                         printf("?\n");
