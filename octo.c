@@ -106,6 +106,9 @@ int parseCommands(char prompt) {
                 }
                 line = parsedNumber.value;
             } else {
+                char input[MAX_LINES][SCREEN_WIDTH];
+                char inputLine[SCREEN_WIDTH];
+                int x;
                 switch (command) {
                     case 'q':
                         exit(0); //Exits the program
@@ -131,6 +134,15 @@ int parseCommands(char prompt) {
                         } else {
                             strcpy(lineContents, buffer[line]);
                             printf("%s", lineContents);
+                        }
+                        break;
+                    case 'i':
+                        for (x = 0; x < MAX_LINES; x++) {
+                            fgets(inputLine, SCREEN_WIDTH, stdin);
+                            if (strcmp(inputLine, ".\n") == 0) {
+                                break;
+                            }
+                            strcpy(input[x], inputLine);
                         }
                         break;
                     default:
