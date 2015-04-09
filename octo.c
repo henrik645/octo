@@ -74,7 +74,9 @@ int parseCommands(char prompt) {
     char command;
     char commandStr[MAX_COMMAND_SIZE];
     int i;
+    int linesInputted;
     int line = 0;
+    int lines = 1;
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
     //char buffer[MAX_LINES][SCREEN_WIDTH];
@@ -121,6 +123,10 @@ int parseCommands(char prompt) {
                         printf("%d\n", line);
                         break;
                     case 'c':
+                        if (line > lines) {
+                            lines = line;
+                            buffer = (char *) realloc(buffer, lines * SCREEN_WIDTH * sizeof(char));
+                        }
                         getchar(); //Flushes input buffer of newlines
                         fgets(lineContents, SCREEN_WIDTH, stdin);
                         strtok(lineContents, "\n"); //Removes the trailing newline
@@ -139,16 +145,19 @@ int parseCommands(char prompt) {
                         }
                         break;
                     case 'i':
-                        for (x = 0; x < MAX_LINES; x++) {
+                        linesInputted = 0;
+                        while (1) {
                             fgets(inputLine, SCREEN_WIDTH, stdin);
-                            if (strcmp(inputLine, ".\n") == 0) {
+                            strtok(inputLine, "\n");
+                            if (strcmp(inputLine, ".") == 0) {
                                 break;
                             }
-                            strcpy(input[x], inputLine);
+                            strcpy(input[linesInputted], inputLine);
+                            linesInputted++;
                         }
+                        lines += linesInputted; //Adds to the buffer
+                        buffer = (char *) realloc(buffer, lines * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         break;
-                    case 'a':
-                        
                     default:
                         printf("?\n");
                         break;
