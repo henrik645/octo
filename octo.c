@@ -80,9 +80,11 @@ int parseCommands(char prompt) {
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
     //char buffer[MAX_LINES][SCREEN_WIDTH];
-    char *buffer = (char *) malloc(SCREEN_WIDTH * sizeof(char));
+    //char *buffer = (char *) malloc(SCREEN_WIDTH * sizeof(char));
+    char *buffer = NULL;
     int isRange = 0;
     struct range range;
+    char *newBuffer;
     
     while(1) {
         printf("%c", prompt);
@@ -126,7 +128,7 @@ int parseCommands(char prompt) {
                     case 'c':
                         if (line > lines) {
                             lines = line;
-                            char *newBuffer = (char *) realloc(buffer, lines * SCREEN_WIDTH * sizeof(char));
+                            newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
                             if (newBuffer == NULL) {
                                 fprintf(stderr, "Error: out of memory");
                                 free(buffer);
@@ -175,7 +177,7 @@ int parseCommands(char prompt) {
                             lines = line;
                         }
                         lines += linesInputted; //Adds to the buffer
-                        char *newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
                             free(buffer);
@@ -186,6 +188,19 @@ int parseCommands(char prompt) {
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
+                        break;
+                    case 'd':
+                        if (line < lines ) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
+                            memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
+                        }
+                        lines--; //Removes the upper lines
+                        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
+                        if (newBuffer == NULL) {
+                            fprintf(stderr, "Error deleting line");
+                            free(buffer);
+                            exit(2);
+                        }
+                        buffer = newBuffer;
                         break;
                     default:
                         printf("?\n");
