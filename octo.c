@@ -49,8 +49,8 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
     int cursor = inputOffset;
     int numCur = 0;
     char number[8] = {};
-    if (input[cursor] > 48 && input[cursor] < 57 && cursor < inputLength) {
-        while (input[cursor] > 48 && input[cursor] < 57 && cursor < inputLength) {
+    if (input[cursor] >= 48 && input[cursor] <= 57 && cursor < inputLength) {
+        while (input[cursor] >= 48 && input[cursor] <= 57 && cursor < inputLength) {
             number[numCur] = input[cursor];
             numCur++;
             cursor++;
@@ -77,7 +77,8 @@ int parseCommands(char prompt) {
     int line = 0;
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
-    char buffer[MAX_LINES][SCREEN_WIDTH];
+    //char buffer[MAX_LINES][SCREEN_WIDTH];
+    char *buffer = (char *) malloc(MAX_LINES * SCREEN_WIDTH * sizeof(char));
     int isRange = 0;
     struct range range;
     
@@ -122,18 +123,19 @@ int parseCommands(char prompt) {
                     case 'c':
                         getchar(); //Flushes input buffer of newlines
                         fgets(lineContents, SCREEN_WIDTH, stdin);
-                        strcpy(buffer[line], lineContents);
+                        strtok(lineContents, "\n"); //Removes the trailing newline
+                        strcpy(buffer + (line * SCREEN_WIDTH), lineContents);
                         break;
                     case 'p':
                         if (isRange) {
                             isRange = 0;
                             int x;
                             for (x = range.start; x <= range.end; x++) {
-                                printf("%s", buffer[x]);
+                                printf("%s\n", buffer + (x * SCREEN_WIDTH));
                             }
                         } else {
-                            strcpy(lineContents, buffer[line]);
-                            printf("%s", lineContents);
+                            strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
+                            printf("%s\n", lineContents);
                         }
                         break;
                     case 'i':
@@ -145,6 +147,8 @@ int parseCommands(char prompt) {
                             strcpy(input[x], inputLine);
                         }
                         break;
+                    case 'a':
+                        
                     default:
                         printf("?\n");
                         break;
