@@ -76,11 +76,11 @@ int parseCommands(char prompt) {
     int i;
     int linesInputted;
     int line = 0;
-    int lines = 1;
+    int lines = 0;
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
     //char buffer[MAX_LINES][SCREEN_WIDTH];
-    char *buffer = (char *) malloc(MAX_LINES * SCREEN_WIDTH * sizeof(char));
+    char *buffer = (char *) malloc(SCREEN_WIDTH * sizeof(char));
     int isRange = 0;
     struct range range;
     
@@ -114,7 +114,8 @@ int parseCommands(char prompt) {
                 int x;
                 switch (command) {
                     case 'q':
-                        exit(0); //Exits the program
+                        free(buffer); //Frees the text buffer
+                        exit(1); //Exits the program
                         break;
                     case 'n':
                         printf("N has been reached!\n");
@@ -125,7 +126,13 @@ int parseCommands(char prompt) {
                     case 'c':
                         if (line > lines) {
                             lines = line;
-                            buffer = (char *) realloc(buffer, lines * SCREEN_WIDTH * sizeof(char));
+                            char *newBuffer = (char *) realloc(buffer, lines * SCREEN_WIDTH * sizeof(char));
+                            if (newBuffer == NULL) {
+                                fprintf(stderr, "Error: out of memory");
+                                free(buffer);
+                                exit(2);
+                            }
+                            buffer = newBuffer;
                         }
                         getchar(); //Flushes input buffer of newlines
                         fgets(lineContents, SCREEN_WIDTH, stdin);
@@ -147,16 +154,38 @@ int parseCommands(char prompt) {
                     case 'i':
                         linesInputted = 0;
                         while (1) {
-                            fgets(inputLine, SCREEN_WIDTH, stdin);
-                            strtok(inputLine, "\n");
-                            if (strcmp(inputLine, ".") == 0) {
-                                break;
+                            char c;
+                            while (1) { //Clears newline from stdin
+                                c = getchar();
+                                if (c != '\n') {
+                                    ungetc(c, stdin); //Puts the character back
+                                    break;
+                                }
                             }
-                            strcpy(input[linesInputted], inputLine);
-                            linesInputted++;
+                            fgets(inputLine, SCREEN_WIDTH, stdin);
+                            if (strcmp(inputLine, ".\n") == 0) {
+                                break;
+                            } else {
+                                strtok(inputLine, "\n");
+                                strcpy(input[linesInputted], inputLine);
+                                linesInputted++;
+                            }
+                        }
+                        if (line > lines) {
+                            lines = line;
                         }
                         lines += linesInputted; //Adds to the buffer
-                        buffer = (char *) realloc(buffer, lines * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        char *newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        if (newBuffer == NULL) {
+                            fprintf(stderr, "Error: out of memory");
+                            free(buffer);
+                            exit(2);
+                        }
+                        buffer = newBuffer;
+                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        for (x = 0; x < linesInputted; x++) {
+                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
+                        }
                         break;
                     default:
                         printf("?\n");
