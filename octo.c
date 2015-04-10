@@ -200,7 +200,6 @@ int parseCommands(char prompt) {
                             lines = line - linesInputted;
                         }
                         lines += linesInputted; //Adds to the buffer
-                        printf("Lines: %d\n", lines);
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
@@ -249,7 +248,7 @@ int parseCommands(char prompt) {
                             }
                         }
                         if (line + linesInputted > lines) {
-                            lines = line;
+                            lines = line - linesInputted;
                         }
                         lines += linesInputted; //Adds to the buffer
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
@@ -259,7 +258,8 @@ int parseCommands(char prompt) {
                             exit(2);
                         }
                         buffer = newBuffer;
-                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        lines += linesInputted;
+                        memmove(&buffer[(line + linesInputted) * SCREEN_WIDTH], &buffer[line * SCREEN_WIDTH], (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
