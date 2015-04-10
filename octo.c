@@ -138,7 +138,7 @@ int parseCommands(char prompt) {
                         }
                         break;
                     case 'e':
-                        printf("%d\n", line);
+                        printf("%d/%d\n", line, lines);
                         break;
                     case 'c':
                         if (line > lines) {
