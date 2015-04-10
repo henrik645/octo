@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 struct number parseInt(char input[], int inputLength, int inputOffset) {
     int cursor = inputOffset;
     int numCur = 0;
-    char number[8] = {};
+    char number[MAX_NUMBER_LEN] = {};
     if (input[cursor] >= 48 && input[cursor] <= 57 && cursor < inputLength) {
         while (input[cursor] >= 48 && input[cursor] <= 57 && cursor < inputLength) {
             number[numCur] = input[cursor];
@@ -120,7 +120,22 @@ int parseCommands(char prompt) {
                         exit(1); //Exits the program
                         break;
                     case 'n':
-                        printf("N has been reached!\n");
+                        if (isRange == 1) {
+                            if (range.start > lines || range.end > lines) {
+                                printf("?\n");
+                            } else {
+                                for (x = range.start; x <= range.end; x++) {
+                                    printf("%d\t%s\n", x, buffer + (x * SCREEN_WIDTH));
+                                }
+                            }
+                        } else {
+                            if (line > lines) {
+                                printf("?\n");
+                            } else {
+                                strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
+                                printf("%d\t%s\n", line, lineContents);
+                            }
+                        }
                         break;
                     case 'e':
                         printf("%d\n", line);
@@ -143,14 +158,22 @@ int parseCommands(char prompt) {
                         break;
                     case 'p':
                         if (isRange) {
-                            isRange = 0;
-                            int x;
-                            for (x = range.start; x <= range.end; x++) {
-                                printf("%s\n", buffer + (x * SCREEN_WIDTH));
+                            if (range.start > lines || range.end > lines) {
+                                printf("?\n");
+                            } else {
+                                isRange = 0;
+                                int x;
+                                for (x = range.start; x <= range.end; x++) {
+                                    printf("%s\n", buffer + (x * SCREEN_WIDTH));
+                                }
                             }
                         } else {
-                            strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
-                            printf("%s\n", lineContents);
+                            if (line > lines) {
+                                printf("?\n");
+                            } else {
+                                strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
+                                printf("%s\n", lineContents);
+                            }
                         }
                         break;
                     case 'i':
@@ -177,6 +200,7 @@ int parseCommands(char prompt) {
                             lines = line - linesInputted;
                         }
                         lines += linesInputted; //Adds to the buffer
+                        printf("Lines: %d\n", lines);
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
@@ -225,7 +249,7 @@ int parseCommands(char prompt) {
                             }
                         }
                         if (line + linesInputted > lines) {
-                            lines = line - linesInputted;
+                            lines = line;
                         }
                         lines += linesInputted; //Adds to the buffer
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
