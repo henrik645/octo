@@ -70,11 +70,13 @@ int main(int argc, char *argv[]) {
     char z;
     int fileExists;
     char prompt = ':';
+    FILE *fp;
     
     if (argc < 1 || argc > 3) {
         printf("Usage: %s [filename] [prompt]\n", argv[0]);
     } else if (argc == 2 || argc == 3) {
-        FILE *fp = fopen(argv[1], "r");
+        fileExists = 1;
+        fp = fopen(argv[1], "r");
         if (fp == NULL) {
             printf("%s: No such file or directory", argv[0]);
             return 1;
@@ -183,6 +185,9 @@ int main(int argc, char *argv[]) {
                         getchar(); //Flushes input buffer of newlines
                         fgets(lineContents, SCREEN_WIDTH, stdin);
                         strtok(lineContents, "\n"); //Removes the trailing newline
+                        for (x = 0; x < SCREEN_WIDTH; x++) { //Clears the line
+                            *(buffer + (line * SCREEN_WIDTH) + x) = 0;
+                        }
                         strcpy(buffer + (line * SCREEN_WIDTH), lineContents);
                         break;
                     case 'p':
@@ -292,6 +297,23 @@ int main(int argc, char *argv[]) {
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
+                        break;
+                    case 'w':
+                        if (fileExists == 1) {
+                            fp = fopen(argv[1], "w");
+                            for (x = 0; x < lines; x++) {
+                                for (z = 0; z < SCREEN_WIDTH - 1; z++) {
+                                    c = *(buffer + (x * SCREEN_WIDTH) + z);
+                                    if (c != 0) {
+                                        fputc(c, fp); //Outputs the character to file
+                                    }
+                                }
+                                fputc('\n', fp); //Puts a newline after every line
+                            }
+                        } else {
+                            printf("?\n");
+                        }
+                        fclose(fp);
                         break;
                     default:
                         printf("?\n");
