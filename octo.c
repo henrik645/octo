@@ -321,6 +321,11 @@ int main(int argc, char *argv[]) {
                         }
                         fclose(fp);
                         break;
+                    case '@':
+                        isRange = 1;
+                        range.start = 1;
+                        range.end = lines;
+                        break;
                     default:
                         printf("?\n");
                         break;
