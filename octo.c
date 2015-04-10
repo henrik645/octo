@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'n':
                         if (isRange == 1) {
-                            if (range.start > lines || range.end > lines) {
+                            if (range.start >= lines || range.end >= lines) {
                                 printf("?\n");
                             } else {
                                 for (x = range.start; x <= range.end; x++) {
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                         } else {
-                            if (line > lines) {
+                            if (line >= lines) {
                                 printf("?\n");
                             } else {
                                 strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'p':
                         if (isRange) {
-                            if (range.start > lines || range.end > lines) {
+                            if (range.start >= lines || range.end >= lines) {
                                 printf("?\n");
                             } else {
                                 isRange = 0;
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                         } else {
-                            if (line > lines) {
+                            if (line >= lines) {
                                 printf("?\n");
                             } else {
                                 strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
