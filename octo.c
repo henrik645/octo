@@ -20,27 +20,32 @@ struct range {
 };
 
 struct number parseInt(char input[], int inputLength, int inputOffset);
-int parseCommands(char prompt);
+// int parseCommands(char prompt, char *file[]);
 
-int main(int argc, char *argv[]) {
-    if (argc != 2 && argc != 3) {
-        printf("Usage: %s filename [prompt]\n", argv[0]);
-    } else {
-        FILE *fp = fopen(argv[1], "r");
-        if (fp == 0) {
-            printf("%s: No such file or directory\n", argv[1]);
-        } else {
-            char prompt;
-            if (argc == 3) {
-                prompt = *argv[2];
-            } else {
-                prompt = ':';
-            }
-            parseCommands(prompt);
-        }
-    }
-    return 0;
-}
+// int main(int argc, char *argv[]) {
+    // if (argc != 1 && argc != 2 && argc != 3) {
+        // printf("Usage: %s [filename] [prompt]\n", argv[0]);
+    // } else {
+        // if (argc == 2 && argc == 3) {
+            // FILE *fp = fopen(argv[1], "r");
+            // if (fp == 0) {
+                // printf("%s: No such file or directory\n", argv[1]);
+            // } else {
+                // char prompt;
+                // if (argc == 3) {
+                    // prompt = *argv[2];
+                // } else {
+                    // prompt = ':';
+                // }
+                // fclose(fp); //Closes the file now when we know it exists
+                // parseCommands(prompt, 1, argv[1]);
+                // fclose(fp);
+            // }
+        // } else {
+            // parseCommands(prompt, 0, ""); //Makes an empty file
+    // }
+    // return 0;
+// }
 
 /* Returns -1 if no integer was found and the integer if it was found (only positive values) 
  * It uses the fact that in ASCII, numbers from 0 to 9 comes after each other.
@@ -70,7 +75,7 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
 /* Parses a command and performs an action. Returns 0 when encountered with an error
  * Returns 1 when the parsing and execution of the command is done
  */
-int parseCommands(char prompt) {
+int main(int argc, char *argv[]) {
     char command;
     char commandStr[MAX_COMMAND_SIZE];
     int i;
@@ -79,12 +84,61 @@ int parseCommands(char prompt) {
     int lines = 0;
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
-    //char buffer[MAX_LINES][SCREEN_WIDTH];
-    //char *buffer = (char *) malloc(0 * SCREEN_WIDTH * sizeof(char));
     char *buffer = NULL;
     int isRange = 0;
     struct range range;
     char *newBuffer;
+    int newLines = 0;
+    int c;
+    int x;
+    char z;
+    int fileExists;
+    char prompt = ':';
+    
+    if (argc < 1 || argc > 3) {
+        printf("Usage: %s [filename] [prompt]\n", argv[0]);
+    } else if (argc == 2 || argc == 3) {
+        FILE *fp = fopen(argv[1], "r");
+        if (fp == NULL) {
+            printf("%s: No such file or directory", argv[0]);
+            return 1;
+        }
+        while ((c = fgetc(fp)) != EOF) {
+            if (c == '\n') {
+                newLines++;
+            }
+        }
+        newLines++;
+        fclose(fp);
+        lines = newLines;
+        
+        printf("%d\n", newLines);
+        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
+        if (newBuffer == NULL) {
+            printf("Error: out of memory");
+            free(buffer);
+            exit(2);
+        }
+        buffer = newBuffer;
+        fp = fopen(argv[1], "r");
+        x = 0; //Line counter
+        z = 0; //Column counter
+        while ((c = fgetc(fp)) != EOF) {
+            if (c == '\n') {
+                z = 0;
+                x++;
+            } else {
+                *(buffer + (x * SCREEN_WIDTH) + z) = c;
+                z++;
+            }
+        }
+        fclose(fp);
+    } else {
+        fileExists = 0;
+    }
+    if (argc == 3) {
+        prompt = argv[3][0];
+    }
     
     while(1) {
         printf("%c", prompt);
@@ -113,7 +167,6 @@ int parseCommands(char prompt) {
             } else {
                 char input[MAX_LINES][SCREEN_WIDTH];
                 char inputLine[SCREEN_WIDTH];
-                int x;
                 switch (command) {
                     case 'q':
                         free(buffer); //Frees the text buffer
