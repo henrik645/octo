@@ -14,38 +14,14 @@ struct number {
     int size;
 };
 
+/* Declares a struct range with a start and an end for ranging
+ */
 struct range {
     int start;
     int end;
 };
 
 struct number parseInt(char input[], int inputLength, int inputOffset);
-// int parseCommands(char prompt, char *file[]);
-
-// int main(int argc, char *argv[]) {
-    // if (argc != 1 && argc != 2 && argc != 3) {
-        // printf("Usage: %s [filename] [prompt]\n", argv[0]);
-    // } else {
-        // if (argc == 2 && argc == 3) {
-            // FILE *fp = fopen(argv[1], "r");
-            // if (fp == 0) {
-                // printf("%s: No such file or directory\n", argv[1]);
-            // } else {
-                // char prompt;
-                // if (argc == 3) {
-                    // prompt = *argv[2];
-                // } else {
-                    // prompt = ':';
-                // }
-                // fclose(fp); //Closes the file now when we know it exists
-                // parseCommands(prompt, 1, argv[1]);
-                // fclose(fp);
-            // }
-        // } else {
-            // parseCommands(prompt, 0, ""); //Makes an empty file
-    // }
-    // return 0;
-// }
 
 /* Returns -1 if no integer was found and the integer if it was found (only positive values) 
  * It uses the fact that in ASCII, numbers from 0 to 9 comes after each other.
