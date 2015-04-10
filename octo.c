@@ -248,6 +248,12 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'd':
+                        if (isRange == 1) {
+                            if (range.start < lines && range.end < lines) {
+                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char));
+                            }
+                            lines -= range.end - range.start;
+                        }
                         if (line < lines ) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
                             memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
                         }
