@@ -319,10 +319,10 @@ int main(int argc, char *argv[]) {
                                 }
                                 fputc('\n', fp); //Puts a newline after every line
                             }
+                            fclose(fp);
                         } else {
                             printf("?\n");
                         }
-                        fclose(fp);
                         break;
                     case 't':
                         if (line + 2 <= lines && line + 1 > 0) {
