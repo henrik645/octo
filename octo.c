@@ -253,18 +253,16 @@ int main(int argc, char *argv[]) {
                     case 'd':
                         if (isRange == 1) {
                             isRange = 0;
-                            if (range.start + 1 < lines && range.end + 1 < lines && range.start + 1 > 1 && range.end + 1 > 1) {
-                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char));
+                            if (range.start + 1 <= lines && range.end + 1 <= lines && range.start + 1 >= 1 && range.end + 1 >= 1) {
+                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end + 1) * SCREEN_WIDTH), ((range.end - range.start) + 1) * SCREEN_WIDTH * sizeof(char)); //Plus one since this is an inclusive delete
                             }
                             lines -= range.end - range.start + 1;
                         } else {
                             if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-                                printf("Line: %d\nLines: %d\n", line, lines);
                                 memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
                             }
                             lines--; //Removes the upper lines
                         }
-                        printf("Lines: %d\n", lines);
                         newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error deleting line");
@@ -272,7 +270,6 @@ int main(int argc, char *argv[]) {
                             exit(2);
                         }
                         buffer = newBuffer;
-                        printf("Lines: %d\n", lines);
                         break;
                     case 'a':
                         line++; //Makes everything operate on the second line
