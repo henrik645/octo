@@ -182,7 +182,6 @@ int main(int argc, char *argv[]) {
                             }
                             buffer = newBuffer;
                         }
-                        getchar(); //Flushes input buffer of newlines
                         fgets(lineContents, SCREEN_WIDTH, stdin);
                         strtok(lineContents, "\n"); //Removes the trailing newline
                         for (x = 0; x < SCREEN_WIDTH; x++) { //Clears the line
@@ -256,7 +255,7 @@ int main(int argc, char *argv[]) {
                             lines -= range.end - range.start + 1;
                         } else {
                             if (line < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-                                memmove(&buffer + (line * SCREEN_WIDTH), &buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
+                                memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
                                 lines--; //Removes the upper lines
                             }
                         }
@@ -292,7 +291,7 @@ int main(int argc, char *argv[]) {
                         if (line + linesInputted > lines) {
                             lines = line - linesInputted;
                         }
-                        lines += linesInputted; //Adds to the buffer
+                        lines += linesInputted - 1; //Adds to the buffer
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
@@ -324,9 +323,13 @@ int main(int argc, char *argv[]) {
                         fclose(fp);
                         break;
                     case '@':
-                        isRange = 1;
-                        range.start = 1;
-                        range.end = lines;
+                        if (lines > 0) {
+                            isRange = 1;
+                            range.start = 0;
+                            range.end = lines;
+                        } else {
+                            line = 0;
+                        }
                         break;
                     default:
                         printf("?\n");
