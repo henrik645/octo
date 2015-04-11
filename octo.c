@@ -250,15 +250,16 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'd':
                         if (isRange == 1) {
-                            if (range.start < lines && range.end < lines) {
-                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char));
+                            if (range.start < lines && range.end < lines && range.start >= 0 && range.end > 0) {
+                                memmove(&buffer + (range.start * SCREEN_WIDTH), &buffer + ((range.end) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char));
                             }
-                            lines -= range.end - range.start;
+                            lines -= range.end - range.start + 1;
+                        } else {
+                            if (line < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
+                                memmove(&buffer + (line * SCREEN_WIDTH), &buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
+                                lines--; //Removes the upper lines
+                            }
                         }
-                        if (line < lines ) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-                            memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
-                        }
-                        lines--; //Removes the upper lines
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error deleting line");
