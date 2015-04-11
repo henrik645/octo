@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
                     isRange = 0;
                 }
                 line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
-                } else {
+            } else {
                 char input[MAX_LINES][SCREEN_WIDTH];
                 char inputLine[SCREEN_WIDTH];
                 if (line + 1 > lines || line + 1 < 1) {
@@ -272,7 +272,9 @@ int main(int argc, char *argv[]) {
                         buffer = newBuffer;
                         break;
                     case 'a':
-                        line++; //Makes everything operate on the second line
+                        if (lines > 0) {
+                            line++; //Makes everything operate on the second line
+                        }
                         linesInputted = 0;
                         while (1) {
                             char c;
@@ -301,7 +303,7 @@ int main(int argc, char *argv[]) {
                         }
                         buffer = newBuffer;
                         memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - linesInputted) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
-                        for (x = 0; x < linesInputted; x++) {
+                        for (x = 0; x <= linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
                         break;
