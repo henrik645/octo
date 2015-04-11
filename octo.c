@@ -4,7 +4,6 @@
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
-#define MAX_LINES 50
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -221,6 +220,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'i':
                         linesInputted = 0;
+                        inputSize = 0;
                         while (1) {
                             char c;
                             while (1) { //Clears newline from stdin
@@ -289,6 +289,7 @@ int main(int argc, char *argv[]) {
                             line++; //Makes everything operate on the second line
                         }
                         linesInputted = 0;
+                        inputSize = 0;
                         while (1) {
                             char c;
                             while (1) { //Clears newline from stdin
