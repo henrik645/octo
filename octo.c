@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
         fileExists = 1;
         fp = fopen(argv[1], "r");
         if (fp == NULL) {
-            printf("%s: No such file or directory", argv[0]);
+            printf("%s: No such file or directory", argv[1]);
             return 1;
         }
         while ((c = fgetc(fp)) != EOF) {
