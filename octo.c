@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
                 switch (command) {
                     case 'q':
                         free(buffer); //Frees the text buffer
-                        exit(1); //Exits the program
+                        exit(0); //Exits the program
                         break;
                     case 'n':
                         if (isRange == 1) {
@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
                                 linesInputted++;
                             }
                         }
-                        lines += linesInputted + 1; //Adds to the buffer
+                        lines += linesInputted; //Adds to the buffer
                         newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
