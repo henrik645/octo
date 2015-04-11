@@ -56,14 +56,14 @@ int main(int argc, char *argv[]) {
     char commandStr[MAX_COMMAND_SIZE];
     int i;
     int linesInputted;
-    int line = 0;
-    int lines = 0;
+    int line = 0; //Shifted by one (0 - line 1, 1 - line 2 ...)
+    int lines = 0; //Total amount of lines, not shifted
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
     char *buffer = NULL;
     int isRange = 0;
     struct range range;
-    char *newBuffer;
+    char *newBuffer = NULL;
     int newLines = 0;
     int c;
     int x;
@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
                     i += endNumber.size - 2; //Minus two to account for a shift of one in parseInt
                     if (endNumber.value >= 0) {
                         isRange = 1;
-                        range.start = parsedNumber.value;
-                        range.end = endNumber.value;
+                        range.start = parsedNumber.value - 1;
+                        range.end = endNumber.value - 1;
                     } else {
                         printf("?\n");
                         break;
@@ -141,10 +141,13 @@ int main(int argc, char *argv[]) {
                 } else {
                     isRange = 0;
                 }
-                line = parsedNumber.value;
-            } else {
+                line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
+                } else {
                 char input[MAX_LINES][SCREEN_WIDTH];
                 char inputLine[SCREEN_WIDTH];
+                if (line + 1 > lines || line + 1 < 1) {
+                    line = lines;
+                }
                 switch (command) {
                     case 'q':
                         free(buffer); //Frees the text buffer
@@ -152,29 +155,33 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'n':
                         if (isRange == 1) {
-                            if (range.start >= lines || range.end > lines || range.start < 0 || range.end <= 0) {
+                            if (range.start + 1 > lines || range.end + 1 > lines || range.start < 0 || range.end < 0) {
                                 printf("?\n");
                             } else {
                                 for (x = range.start; x <= range.end; x++) {
-                                    printf("%d\t%s\n", x, buffer + (x * SCREEN_WIDTH));
+                                    printf("%d\t%s\n", x + 1, buffer + (x * SCREEN_WIDTH));
                                 }
                             }
                         } else {
-                            if (line > lines || line < 0) {
+                            if (line + 1 > lines || line < 1) {
                                 printf("?\n");
                             } else {
                                 strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
-                                printf("%d\t%s\n", line, lineContents);
+                                printf("%d\t%s\n", line + 1, lineContents);
                             }
                         }
                         break;
                     case 'e':
-                        printf("%d/%d\n", line, lines);
+                        if (lines > 0) {
+                            printf("%d/%d\n", line + 1, lines);
+                        } else {
+                            printf("%d/%d\n", line, lines);
+                        }
                         break;
                     case 'c':
-                        if (line > lines) {
-                            lines = line;
-                            newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
+                        if (line + 1 > lines) {
+                            lines = line + 1;
+                            newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
                             if (newBuffer == NULL) {
                                 fprintf(stderr, "Error: out of memory");
                                 free(buffer);
@@ -191,7 +198,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'p':
                         if (isRange) {
-                            if (range.start > lines || range.end > lines || range.start < 0 || range.end < 0) {
+                            if (range.start + 1 > lines || range.end + 1 > lines || range.start < 0 || range.end < 0) {
                                 printf("?\n");
                             } else {
                                 isRange = 0;
@@ -201,7 +208,7 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                         } else {
-                            if (line > lines || line < 0) {
+                            if (line + 1 > lines || line < 1) {
                                 printf("?\n");
                             } else {
                                 strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
@@ -229,43 +236,42 @@ int main(int argc, char *argv[]) {
                                 linesInputted++;
                             }
                         }
-                        if (line + linesInputted > lines) {
-                            lines = line - linesInputted;
-                        }
-                        printf("%d\n", linesInputted);
                         lines += linesInputted; //Adds to the buffer
-                        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
                             free(buffer);
                             exit(2);
                         }
                         buffer = newBuffer;
-                        lines += linesInputted;
-                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - linesInputted) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
                         break;
                     case 'd':
                         if (isRange == 1) {
-                            if (range.start < lines && range.end < lines && range.start >= 0 && range.end > 0) {
-                                memmove(&buffer + (range.start * SCREEN_WIDTH), &buffer + ((range.end) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char));
+                            isRange = 0;
+                            if (range.start + 1 < lines && range.end + 1 < lines && range.start + 1 > 1 && range.end + 1 > 1) {
+                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char));
                             }
                             lines -= range.end - range.start + 1;
                         } else {
-                            if (line < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-                                memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - line) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
-                                lines--; //Removes the upper lines
+                            if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
+                                printf("Line: %d\nLines: %d\n", line, lines);
+                                memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
                             }
+                            lines--; //Removes the upper lines
                         }
-                        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
+                        printf("Lines: %d\n", lines);
+                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error deleting line");
                             free(buffer);
                             exit(2);
                         }
                         buffer = newBuffer;
+                        printf("Lines: %d\n", lines);
                         break;
                     case 'a':
                         line++; //Makes everything operate on the second line
@@ -288,19 +294,15 @@ int main(int argc, char *argv[]) {
                                 linesInputted++;
                             }
                         }
-                        if (line + linesInputted > lines) {
-                            lines = line - linesInputted;
-                        }
-                        lines += linesInputted - 1; //Adds to the buffer
-                        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        lines += linesInputted + 1; //Adds to the buffer
+                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
                             free(buffer);
                             exit(2);
                         }
                         buffer = newBuffer;
-                        lines += linesInputted;
-                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - linesInputted) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
@@ -326,7 +328,7 @@ int main(int argc, char *argv[]) {
                         if (lines > 0) {
                             isRange = 1;
                             range.start = 0;
-                            range.end = lines;
+                            range.end = lines - 1;
                         } else {
                             line = 0;
                         }
