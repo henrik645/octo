@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
     
     while(1) {
         printf("%c", prompt);
-        scanf("%s", commandStr);
+        gets(commandStr);
         for (i = 0; i < strlen(commandStr);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
             command = commandStr[i];
             parsedNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
