@@ -24,7 +24,7 @@ struct range {
 struct number parseInt(char input[], int inputLength, int inputOffset);
 
 /* Returns -1 if no integer was found and the integer if it was found (only positive values) 
- * It uses the fact that in ASCII, numbers from 0 to 9 comes after each other.
+ * It utilises the fact that in ASCII, numbers from 0 to 9 comes after each other.
  */
 struct number parseInt(char input[], int inputLength, int inputOffset) {
     int cursor = inputOffset;
@@ -48,8 +48,8 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
     }
 }
 
-/* Parses a command and performs an action. Returns 0 when encountered with an error
- * Returns 1 when the parsing and execution of the command is done
+/* Parses a command and performs an action. Returns 1 when encountered with an error
+ * Returns 0 when a quit command is reached
  */
 int main(int argc, char *argv[]) {
     char command;
