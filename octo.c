@@ -71,6 +71,10 @@ int main(int argc, char *argv[]) {
     int fileExists;
     char prompt = ':';
     char templine[SCREEN_WIDTH]; //Temporary files for use in the transpose command
+    char inputLine[SCREEN_WIDTH];
+    char *input = NULL;
+    char *newInput = NULL;
+    int inputSize = 0;
     FILE *fp;
     
     if (argc < 1 || argc > 3) {
@@ -144,8 +148,6 @@ int main(int argc, char *argv[]) {
                 }
                 line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
             } else {
-                char input[MAX_LINES][SCREEN_WIDTH];
-                char inputLine[SCREEN_WIDTH];
                 if (line + 1 > lines || line + 1 < 1) {
                     line = lines;
                 }
@@ -233,7 +235,16 @@ int main(int argc, char *argv[]) {
                                 break;
                             } else {
                                 strtok(inputLine, "\n");
-                                strcpy(input[linesInputted], inputLine);
+                                if (linesInputted + 1 > inputSize) {
+                                    inputSize = linesInputted + 1;
+                                    newInput = realloc(input, inputSize * SCREEN_WIDTH * sizeof(char));
+                                    if (newInput == NULL) {
+                                        printf("Error: out of memory\n");
+                                        exit(1);
+                                    }
+                                    input = newInput;
+                                }
+                                strcpy(input + (linesInputted * SCREEN_WIDTH * sizeof(char)), inputLine);
                                 linesInputted++;
                             }
                         }
@@ -247,8 +258,10 @@ int main(int argc, char *argv[]) {
                         buffer = newBuffer;
                         memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - linesInputted) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < linesInputted; x++) {
-                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
+                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), (input + (x * SCREEN_WIDTH * sizeof(char))));
                         }
+                        free(input); //Resets the input
+                        input = NULL;
                         break;
                     case 'd':
                         if (isRange == 1) {
@@ -290,7 +303,16 @@ int main(int argc, char *argv[]) {
                                 break;
                             } else {
                                 strtok(inputLine, "\n");
-                                strcpy(input[linesInputted], inputLine);
+                                if (linesInputted + 1 > inputSize) {
+                                    inputSize = linesInputted + 1;
+                                    newInput = realloc(input, inputSize * SCREEN_WIDTH * sizeof(char));
+                                    if (newInput == NULL) {
+                                        printf("Error: out of memory\n");
+                                        exit(1);
+                                    }
+                                    input = newInput;
+                                }
+                                strcpy(input + (linesInputted * SCREEN_WIDTH * sizeof(char)), inputLine);
                                 linesInputted++;
                             }
                         }
@@ -304,8 +326,10 @@ int main(int argc, char *argv[]) {
                         buffer = newBuffer;
                         memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - linesInputted) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x <= linesInputted; x++) {
-                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
+                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), input + (x * SCREEN_WIDTH * sizeof(char)));
                         }
+                        free(input);
+                        input = NULL;
                         break;
                     case 'w':
                         if (fileExists == 1) {
