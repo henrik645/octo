@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     char z;
     int fileExists;
     char prompt = ':';
+    char templine[SCREEN_WIDTH]; //Temporary files for use in the transpose command
     FILE *fp;
     
     if (argc < 1 || argc > 3) {
@@ -323,6 +324,24 @@ int main(int argc, char *argv[]) {
                             printf("?\n");
                         }
                         fclose(fp);
+                        break;
+                    case 't':
+                        if (line + 2 <= lines && line + 1 > 0) {
+                            strcpy(templine, buffer + ((line + 1) * SCREEN_WIDTH));
+                            strcpy(buffer + ((line + 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
+                            strcpy(buffer + (line * SCREEN_WIDTH), templine);
+                        } else {
+                            printf("?\n");
+                        }
+                        break;
+                    case 'T':
+                        if (line + 1 <= lines && line > 1) {
+                            strcpy(templine, buffer + ((line - 1) * SCREEN_WIDTH));
+                            strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
+                            strcpy(buffer + (line * SCREEN_WIDTH), templine);
+                        } else {
+                            printf("?\n");
+                        }
                         break;
                     case '@':
                         if (lines > 0) {
