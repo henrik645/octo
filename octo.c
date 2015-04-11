@@ -233,6 +233,7 @@ int main(int argc, char *argv[]) {
                         if (line + linesInputted > lines) {
                             lines = line - linesInputted;
                         }
+                        printf("%d\n", linesInputted);
                         lines += linesInputted; //Adds to the buffer
                         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
@@ -242,7 +243,7 @@ int main(int argc, char *argv[]) {
                         }
                         buffer = newBuffer;
                         lines += linesInputted;
-                        memmove(&buffer[(line + linesInputted) * SCREEN_WIDTH], &buffer[line * SCREEN_WIDTH], (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
@@ -299,7 +300,7 @@ int main(int argc, char *argv[]) {
                         }
                         buffer = newBuffer;
                         lines += linesInputted;
-                        memmove(&buffer[(line + linesInputted) * SCREEN_WIDTH], &buffer[line * SCREEN_WIDTH], (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < linesInputted; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), input[x]);
                         }
