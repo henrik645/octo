@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     int newLines = 0;
     int c;
     int x;
-    char z;
+    int z;
     int fileExists;
     char fileName[SCREEN_WIDTH];
     char prompt = ':';
@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
     char *input = NULL;
     char *newInput = NULL;
     int inputSize = 0;
+    int fileLines = 0;
     FILE *fp;
     
     if (argc < 1 || argc > 3) {
@@ -383,7 +384,7 @@ int main(int argc, char *argv[]) {
                         strtok(fileName, "\n"); //Removes the trailing newline
                         fp = fopen(fileName, "w");
                         if (fp == NULL) {
-                            printf("!");
+                            printf("!\n");
                             strcpy(fileName, "\0"); //Empties the filename
                         }
                         fileExists = 1;
@@ -395,6 +396,46 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                             fputc('\n', fp);
+                        }
+                        fclose(fp);
+                        break;
+                    case 'o':
+                        printf("File: ");
+                        fgets(fileName, SCREEN_WIDTH, stdin);
+                        strtok(fileName, "\n"); //Removes the trailing newline
+                        fp = fopen(fileName, "r");
+                        if (fp == NULL) {
+                            printf("!\n");
+                            strcpy(fileName, "\0"); //Empties the filename string
+                        }
+                        fileExists = 1;
+                        fileLines = 0;
+                        while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
+                            if (c == '\n') {
+                                fileLines++;
+                            }
+                        }
+                        fileLines++; //To reserve space for the last line which may not be ended by a carriage return
+                        lines = fileLines;
+                        printf("%d\n", fileLines);
+                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
+                        if (newBuffer == NULL) {
+                            fprintf(stderr, "Error: out of memory\n");
+                            fclose(fp);
+                            exit(1);
+                        }
+                        buffer = newBuffer;
+                        rewind(fp); //Rewinds the file for reading actual file contents
+                        x = 0;
+                        z = 0;
+                        while ((c = fgetc(fp)) != EOF) {
+                            if (c == '\n') {
+                                z = 0;
+                                x++;
+                            } else {
+                                *(buffer + (x * SCREEN_WIDTH) + z) = c;
+                                z++;
+                            }
                         }
                         fclose(fp);
                         break;
