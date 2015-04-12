@@ -78,10 +78,12 @@ int main(int argc, char *argv[]) {
     int fileLines = 0;
     int fileChars = 0;
     char error[SCREEN_WIDTH];
+    strcpy(error, "");
     FILE *fp;
     
     if (argc < 1 || argc > 3) {
         printf("Usage: %s [filename] [prompt]\n", argv[0]);
+        exit(1);
     } else if (argc == 2 || argc == 3) {
         fileExists = 1;
         strcpy(fileName, argv[1]);
