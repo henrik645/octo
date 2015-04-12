@@ -76,6 +76,7 @@ int main(int argc, char *argv[]) {
     char *newInput = NULL;
     int inputSize = 0;
     int fileLines = 0;
+    int fileChars = 0;
     FILE *fp;
     
     if (argc < 1 || argc > 3) {
@@ -97,7 +98,6 @@ int main(int argc, char *argv[]) {
         fclose(fp);
         lines = newLines;
         
-        printf("%d\n", newLines);
         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
         if (newBuffer == NULL) {
             printf("Error: out of memory");
@@ -115,9 +115,11 @@ int main(int argc, char *argv[]) {
             } else {
                 *(buffer + (x * SCREEN_WIDTH) + z) = c;
                 z++;
+                fileChars++;
             }
         }
         fclose(fp);
+        printf("%d\n", fileChars);
     } else {
         fileExists = 0;
     }
@@ -344,6 +346,7 @@ int main(int argc, char *argv[]) {
                         input = NULL;
                         break;
                     case 'w':
+                        fileChars = 0;
                         if (fileExists == 1) {
                             fp = fopen(fileName, "w");
                             for (x = 0; x < lines; x++) {
@@ -351,6 +354,7 @@ int main(int argc, char *argv[]) {
                                     c = *(buffer + (x * SCREEN_WIDTH) + z);
                                     if (c != 0) {
                                         fputc(c, fp); //Outputs the character to file
+                                        fileChars++;
                                     }
                                 }
                                 fputc('\n', fp); //Puts a newline after every line
@@ -371,12 +375,14 @@ int main(int argc, char *argv[]) {
                                     c = *(buffer + (x * SCREEN_WIDTH) + z);
                                     if (c != 0) {
                                         fputc(c, fp);
+                                        fileChars++;
                                     }
                                 }
                                 fputc('\n', fp);
                             }
                             fclose(fp);
                         }
+                        printf("%d\n", fileChars);
                         break;
                     case 'W':
                         printf("File: ");
@@ -388,16 +394,19 @@ int main(int argc, char *argv[]) {
                             strcpy(fileName, "\0"); //Empties the filename
                         }
                         fileExists = 1;
+                        fileChars = 0;
                         for (x = 0; x < lines; x++) {
                             for (z = 0; z < SCREEN_WIDTH - 1; z++) {
                                 c = *(buffer + (x * SCREEN_WIDTH) + z);
                                 if (c != 0) {
                                     fputc(c, fp);
+                                    fileChars++;
                                 }
                             }
                             fputc('\n', fp);
                         }
                         fclose(fp);
+                        printf("%d\n", fileChars);
                         break;
                     case 'o':
                         printf("File: ");
@@ -417,7 +426,6 @@ int main(int argc, char *argv[]) {
                         }
                         fileLines++; //To reserve space for the last line which may not be ended by a carriage return
                         lines = fileLines;
-                        printf("%d\n", fileLines);
                         newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
                         if (newBuffer == NULL) {
                             fprintf(stderr, "Error: out of memory\n");
@@ -428,6 +436,7 @@ int main(int argc, char *argv[]) {
                         rewind(fp); //Rewinds the file for reading actual file contents
                         x = 0;
                         z = 0;
+                        fileChars = 0;
                         while ((c = fgetc(fp)) != EOF) {
                             if (c == '\n') {
                                 z = 0;
@@ -435,9 +444,11 @@ int main(int argc, char *argv[]) {
                             } else {
                                 *(buffer + (x * SCREEN_WIDTH) + z) = c;
                                 z++;
+                                fileChars++;
                             }
                         }
                         fclose(fp);
+                        printf("%d\n", fileChars);
                         break;
                     case 't':
                         if (line + 2 <= lines && line + 1 > 0) {
