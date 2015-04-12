@@ -290,6 +290,9 @@ int main(int argc, char *argv[]) {
                         if (lines > 0) {
                             line++; //Makes everything operate on the second line
                         }
+                        if (line + 1 > lines) {
+                            lines = line;
+                        }
                         linesInputted = 0;
                         inputSize = 0;
                         while (1) { //Clears newline from stdin
