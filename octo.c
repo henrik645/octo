@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
     int x;
     char z;
     int fileExists;
+    char fileName[SCREEN_WIDTH];
     char prompt = ':';
     char templine[SCREEN_WIDTH]; //Temporary files for use in the transpose command
     char inputLine[SCREEN_WIDTH];
@@ -80,6 +81,7 @@ int main(int argc, char *argv[]) {
         printf("Usage: %s [filename] [prompt]\n", argv[0]);
     } else if (argc == 2 || argc == 3) {
         fileExists = 1;
+        strcpy(fileName, argv[1]);
         fp = fopen(argv[1], "r");
         if (fp == NULL) {
             printf("%s: No such file or directory", argv[1]);
@@ -342,7 +344,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'w':
                         if (fileExists == 1) {
-                            fp = fopen(argv[1], "w");
+                            fp = fopen(fileName, "w");
                             for (x = 0; x < lines; x++) {
                                 for (z = 0; z < SCREEN_WIDTH - 1; z++) {
                                     c = *(buffer + (x * SCREEN_WIDTH) + z);
@@ -354,8 +356,47 @@ int main(int argc, char *argv[]) {
                             }
                             fclose(fp);
                         } else {
-                            printf("?\n");
+                            printf("File: ");
+                            fgets(fileName, SCREEN_WIDTH, stdin);
+                            strtok(fileName, "\n"); //Removes the trailing newline
+                            fp = fopen(fileName, "w");
+                            if (fp == NULL) {
+                                printf("!");
+                                strcpy(fileName, "\0"); //Empties the filename
+                            }
+                            fileExists = 1;
+                            for (x = 0; x < lines; x++) {
+                                for (z = 0; z < SCREEN_WIDTH - 1; z++) {
+                                    c = *(buffer + (x * SCREEN_WIDTH) + z);
+                                    if (c != 0) {
+                                        fputc(c, fp);
+                                    }
+                                }
+                                fputc('\n', fp);
+                            }
+                            fclose(fp);
                         }
+                        break;
+                    case 'W':
+                        printf("File: ");
+                        fgets(fileName, SCREEN_WIDTH, stdin);
+                        strtok(fileName, "\n"); //Removes the trailing newline
+                        fp = fopen(fileName, "w");
+                        if (fp == NULL) {
+                            printf("!");
+                            strcpy(fileName, "\0"); //Empties the filename
+                        }
+                        fileExists = 1;
+                        for (x = 0; x < lines; x++) {
+                            for (z = 0; z < SCREEN_WIDTH - 1; z++) {
+                                c = *(buffer + (x * SCREEN_WIDTH) + z);
+                                if (c != 0) {
+                                    fputc(c, fp);
+                                }
+                            }
+                            fputc('\n', fp);
+                        }
+                        fclose(fp);
                         break;
                     case 't':
                         if (line + 2 <= lines && line + 1 > 0) {
