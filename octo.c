@@ -204,6 +204,9 @@ int main(int argc, char *argv[]) {
                             buffer = newBuffer;
                         }
                         fgets(lineContents, SCREEN_WIDTH, stdin);
+                        if (strcmp(lineContents, "\n") == 0) {
+                            strcpy(lineContents, "");
+                        }
                         strtok(lineContents, "\n"); //Removes the trailing newline
                         for (x = 0; x < SCREEN_WIDTH; x++) { //Clears the line
                             *(buffer + (line * SCREEN_WIDTH) + x) = 0;
