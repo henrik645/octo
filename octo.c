@@ -504,6 +504,7 @@ int main(int argc, char *argv[]) {
                         break;
                     default:
                         printf("?\n");
+                        strcpy(commandStr, ""); //Empties commandStr, accepting no more commands after an error
                         strcpy(error, "unknown command");
                         break;
                 }
