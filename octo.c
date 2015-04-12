@@ -436,7 +436,6 @@ int main(int argc, char *argv[]) {
                                     fileLines++;
                                 }
                             }
-                            fileLines++; //To reserve space for the last line which may not be ended by a carriage return
                             lines = fileLines;
                             newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
                             if (newBuffer == NULL) {
