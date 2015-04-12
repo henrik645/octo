@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
                 if (commandStr[i] == ',') {
                     i++; //Removes the ','
                     struct number endNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
-                    i += endNumber.size - 2; //Minus two to account for a shift of one in parseInt
+                    i = endNumber.size; //endNumber.size was already initialized to i beforehand
                     if (endNumber.value >= 0) {
                         isRange = 1;
                         range.start = parsedNumber.value - 1;
