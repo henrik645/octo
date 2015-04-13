@@ -82,6 +82,9 @@ int main(int argc, char *argv[]) {
     char replacestr[SCREEN_WIDTH];
     char *replaceptr; //For use by the search & replace command
     int unsaved = 0; //Set to 1 when there are unsaved changes
+    char *copied = NULL; //Pointer to memory where copied sections of text are stored
+    int copyLines = 0; //How many lines are stored there
+    char copyLine[SCREEN_WIDTH];
     strcpy(error, "");
     FILE *fp;
     
@@ -588,6 +591,42 @@ int main(int argc, char *argv[]) {
                         break;
                     case '!':
                         unsaved = 0;
+                        break;
+                    case 'z':
+                        free(copied);
+                        copied = NULL;
+                        if (isRange == 1) {
+                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
+                                for (x = range.start; x <= range.end; x++) {
+                                    strcpy(copyLine, buffer + (x * SCREEN_WIDTH)); //Copies one line at a time to copyLine
+                                    newBuffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
+                                    if (newBuffer == NULL) {
+                                        printf("Error: out of memory\n");
+                                        exit(1);
+                                    }
+                                    copied = newBuffer;
+                                    strcpy(copied + (copyLines * SCREEN_WIDTH), copyLine);
+                                    copyLines++;
+                                }
+                            } else {
+                                printf("?\n");
+                                strcpy(error, "lines out of range");
+                            }
+                        } else {
+                            if (line >= 0 && line < lines) {
+                                newBuffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
+                                if (newBuffer == NULL) {
+                                    printf("Error: out of memory\n");
+                                    exit(1);
+                                }
+                                copied = newBuffer;
+                                strcpy(copied + (line * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
+                                copyLines = 1;
+                            } else {
+                                printf("?\n");
+                                strcpy(error, "line out of range");
+                            }
+                        }
                         break;
                     default:
                         printf("?\n");
