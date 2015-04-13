@@ -231,7 +231,6 @@ int main(int argc, char *argv[]) {
                                 strcpy(error, "range outside limits");
                                 printf("?\n");
                             } else {
-                                isRange = 0;
                                 int x;
                                 for (x = range.start; x <= range.end; x++) {
                                     printf("%s\n", buffer + (x * SCREEN_WIDTH));
