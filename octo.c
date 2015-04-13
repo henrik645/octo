@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
             command = commandStr[i];
             parsedNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
             if (parsedNumber.value >= 0) { //Input is number
-                i += parsedNumber.size;
+                i = parsedNumber.size; //parsedNumber.size was already initialized to i beforehand
                 if (commandStr[i] == ',') {
                     i++; //Removes the ','
                     struct number endNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
