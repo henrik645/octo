@@ -81,6 +81,7 @@ int main(int argc, char *argv[]) {
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char *replaceptr; //For use by the search & replace command
+    int unsaved = 0; //Set to 1 when there are unsaved changes
     strcpy(error, "");
     FILE *fp;
     
@@ -165,8 +166,13 @@ int main(int argc, char *argv[]) {
                 }
                 switch (command) {
                     case 'q':
-                        free(buffer); //Frees the text buffer
-                        exit(0); //Exits the program
+                        if (unsaved == 0) {
+                            free(buffer); //Frees the text buffer
+                            exit(0); //Exits the program
+                        } else {
+                            printf("!\n");
+                            strcpy(error, "unsaved changes");
+                        }
                         break;
                     case 'n':
                         if (isRange == 1) {
@@ -284,6 +290,7 @@ int main(int argc, char *argv[]) {
                         }
                         free(input); //Resets the input
                         input = NULL;
+                        unsaved = 1;
                         break;
                     case 'd':
                         if (isRange == 1) {
@@ -305,6 +312,7 @@ int main(int argc, char *argv[]) {
                             exit(2);
                         }
                         buffer = newBuffer;
+                        unsaved = 1;
                         break;
                     case 'a':
                         if (lines > 0) {
@@ -359,6 +367,7 @@ int main(int argc, char *argv[]) {
                         }
                         free(input);
                         input = NULL;
+                        unsaved = 1;
                         break;
                     case 'w':
                         fileChars = 0;
@@ -399,6 +408,7 @@ int main(int argc, char *argv[]) {
                                 }
                                 fclose(fp);
                                 printf("%d\n", fileChars);
+                                unsaved = 0;
                             }
                         }
                         break;
@@ -426,49 +436,55 @@ int main(int argc, char *argv[]) {
                             }
                             fclose(fp);
                             printf("%d\n", fileChars);
+                            unsaved = 0;
                         }
                         break;
                     case 'o':
-                        printf("File: ");
-                        fgets(fileName, SCREEN_WIDTH, stdin);
-                        strtok(fileName, "\n"); //Removes the trailing newline
-                        fp = fopen(fileName, "r");
-                        if (fp == NULL) {
-                            printf("!\n");
-                            strcpy(error, "file not found");
-                            fileExists = 0;
-                        } else {
-                            fileExists = 1;
-                            fileLines = 0;
-                            while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
-                                if (c == '\n') {
-                                    fileLines++;
+                        if (unsaved == 0) {
+                            printf("File: ");
+                            fgets(fileName, SCREEN_WIDTH, stdin);
+                            strtok(fileName, "\n"); //Removes the trailing newline
+                            fp = fopen(fileName, "r");
+                            if (fp == NULL) {
+                                printf("!\n");
+                                strcpy(error, "file not found");
+                                fileExists = 0;
+                            } else {
+                                fileExists = 1;
+                                fileLines = 0;
+                                while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
+                                    if (c == '\n') {
+                                        fileLines++;
+                                    }
                                 }
-                            }
-                            lines = fileLines;
-                            newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
-                            if (newBuffer == NULL) {
-                                fprintf(stderr, "Error: out of memory\n");
+                                lines = fileLines;
+                                newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
+                                if (newBuffer == NULL) {
+                                    fprintf(stderr, "Error: out of memory\n");
+                                    fclose(fp);
+                                    exit(1);
+                                }
+                                buffer = newBuffer;
+                                rewind(fp); //Rewinds the file for reading actual file contents
+                                x = 0;
+                                z = 0;
+                                fileChars = 0;
+                                while ((c = fgetc(fp)) != EOF) {
+                                    if (c == '\n') {
+                                        z = 0;
+                                        x++;
+                                    } else {
+                                        *(buffer + (x * SCREEN_WIDTH) + z) = c;
+                                        z++;
+                                        fileChars++;
+                                    }
+                                }
                                 fclose(fp);
-                                exit(1);
+                                printf("%d\n", fileChars);
                             }
-                            buffer = newBuffer;
-                            rewind(fp); //Rewinds the file for reading actual file contents
-                            x = 0;
-                            z = 0;
-                            fileChars = 0;
-                            while ((c = fgetc(fp)) != EOF) {
-                                if (c == '\n') {
-                                    z = 0;
-                                    x++;
-                                } else {
-                                    *(buffer + (x * SCREEN_WIDTH) + z) = c;
-                                    z++;
-                                    fileChars++;
-                                }
-                            }
-                            fclose(fp);
-                            printf("%d\n", fileChars);
+                        } else {
+                            printf("!\n");
+                            strcpy(error, "unsaved changes");
                         }
                         break;
                     case 't':
@@ -480,6 +496,7 @@ int main(int argc, char *argv[]) {
                             strcpy(error, "can't transpose last line");
                             printf("?\n");
                         }
+                        unsaved = 1;
                         break;
                     case 'T':
                         if (line + 1 <= lines && line > 1) {
@@ -498,6 +515,7 @@ int main(int argc, char *argv[]) {
                         } else {
                             printf("%s\n", error);
                         }
+                        unsaved = 1;
                         break;
                     case 'f':
                         printf("Search: ");
@@ -557,6 +575,7 @@ int main(int argc, char *argv[]) {
                                 strcpy(error, "line out of range");
                             }
                         }
+                        unsaved = 1;
                         break;
                     case '@':
                         if (lines > 0) {
@@ -566,6 +585,9 @@ int main(int argc, char *argv[]) {
                         } else {
                             line = 0;
                         }
+                        break;
+                    case '!':
+                        unsaved = 0;
                         break;
                     default:
                         printf("?\n");
