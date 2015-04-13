@@ -78,6 +78,9 @@ int main(int argc, char *argv[]) {
     int fileLines = 0;
     int fileChars = 0;
     char error[SCREEN_WIDTH];
+    char searchstr[SCREEN_WIDTH];
+    char replacestr[SCREEN_WIDTH];
+    char *replaceptr; //For use by the search & replace command
     strcpy(error, "");
     FILE *fp;
     
@@ -494,6 +497,65 @@ int main(int argc, char *argv[]) {
                             printf("?\n");
                         } else {
                             printf("%s\n", error);
+                        }
+                        break;
+                    case 'f':
+                        printf("Search: ");
+                        fgets(searchstr, SCREEN_WIDTH, stdin);
+                        strtok(searchstr, "\n"); //Removes trailing newline
+                        if (isRange == 1) {
+                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
+                                for (x = range.start; x <= range.end; x++) {
+                                    if (strstr(buffer + (x * SCREEN_WIDTH), searchstr) != NULL) {
+                                        printf("%s\n", buffer + (x * SCREEN_WIDTH));
+                                    }
+                                }
+                            } else {
+                                printf("?\n");
+                                strcpy(error, "lines out of range");
+                            }
+                        } else {
+                            if (line >= 0 && line < lines) {
+                                if (strstr(buffer + (line * SCREEN_WIDTH), searchstr) != NULL) { //match was found
+                                    printf("%s\n", buffer + (line * SCREEN_WIDTH));
+                                }
+                            } else {
+                                printf("?\n");
+                                strcpy(error, "line out of range");
+                            }
+                        }
+                        break;
+                    case 's':
+                        printf("Search: ");
+                        fgets(searchstr, SCREEN_WIDTH, stdin);
+                        strtok(searchstr, "\n");
+                        printf("Replace: ");
+                        fgets(replacestr, SCREEN_WIDTH, stdin);
+                        strtok(replacestr, "\n");
+                        if (isRange == 1) {
+                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
+                                for (x = range.start; x <= range.end; x++) {
+                                    if ((replaceptr = strstr(buffer + (x * SCREEN_WIDTH), searchstr)) != NULL) { //match was found
+                                        for (z = 0; z <= strlen(replacestr); z++) {
+                                            *(replaceptr + z) = replacestr[z];
+                                        }
+                                    }
+                                }
+                            } else {
+                                printf("?\n");
+                                strcpy(error, "lines out of range");
+                            }
+                        } else {
+                            if (line >= 0 && line < lines) {
+                                if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH), searchstr)) != NULL) {
+                                    for (x = 0; x <= strlen(replacestr); x++) {
+                                        *(replaceptr + x) = replacestr[x];
+                                    }
+                                }
+                            } else {
+                                printf("?\n");
+                                strcpy(error, "line out of range");
+                            }
                         }
                         break;
                     case '@':
