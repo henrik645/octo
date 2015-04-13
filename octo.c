@@ -594,6 +594,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'z':
                         free(copied);
+                        copyLines = 0;
                         copied = NULL;
                         if (isRange == 1) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
@@ -630,6 +631,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'x':
                         free(copied);
+                        copyLines = 0;
                         copied = NULL;
                         if (isRange == 1) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
@@ -689,6 +691,8 @@ int main(int argc, char *argv[]) {
                         buffer = newBuffer;
                         unsaved = 1;
                         break;
+                    case 'v':
+                        
                     default:
                         printf("?\n");
                         strcpy(commandStr, ""); //Empties commandStr, accepting no more commands after an error
