@@ -692,7 +692,20 @@ int main(int argc, char *argv[]) {
                         unsaved = 1;
                         break;
                     case 'v':
-                        
+                        lines += copyLines; //Adds the newly copied lines
+                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        if (newBuffer == NULL) {
+                            fprintf(stderr, "Error: out of memory");
+                            free(buffer);
+                            exit(2);
+                        }
+                        buffer = newBuffer;
+                        memmove(buffer + ((line + copyLines) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - copyLines) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
+                        for (x = 0; x < copyLines; x++) {
+                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), copied + (x * SCREEN_WIDTH));
+                        }
+                        unsaved = 1;
+                        break;
                     default:
                         printf("?\n");
                         strcpy(commandStr, ""); //Empties commandStr, accepting no more commands after an error
