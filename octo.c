@@ -620,7 +620,7 @@ int main(int argc, char *argv[]) {
                                     exit(1);
                                 }
                                 copied = newBuffer;
-                                strcpy(copied + (line * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
+                                strcpy(copied, buffer + (line * SCREEN_WIDTH));
                                 copyLines = 1;
                             } else {
                                 printf("?\n");
