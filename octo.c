@@ -527,7 +527,7 @@ int main(int argc, char *argv[]) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
                                 for (x = range.start; x <= range.end; x++) {
                                     if (strstr(buffer + (x * SCREEN_WIDTH), searchstr) != NULL) {
-                                        printf("%s\n", buffer + (x * SCREEN_WIDTH));
+                                        printf("%d\t%s\n", x + 1, buffer + (x * SCREEN_WIDTH));
                                     }
                                 }
                             } else {
@@ -537,7 +537,7 @@ int main(int argc, char *argv[]) {
                         } else {
                             if (line >= 0 && line < lines) {
                                 if (strstr(buffer + (line * SCREEN_WIDTH), searchstr) != NULL) { //match was found
-                                    printf("%s\n", buffer + (line * SCREEN_WIDTH));
+                                    printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
                                 }
                             } else {
                                 printf("?\n");
