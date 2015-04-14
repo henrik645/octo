@@ -429,6 +429,7 @@ int main(int argc, char *argv[]) {
                             }
                             fclose(fp);
                             printf("%d\n", fileChars);
+                            unsaved = 0;
                         } else {
                             printf("File: ");
                             fgets(fileName, SCREEN_WIDTH, stdin);
