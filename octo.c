@@ -6,6 +6,7 @@
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
+#define VERSION "0.2"
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -100,6 +101,8 @@ int main(int argc, char *argv[]) {
     char copyLine[SCREEN_WIDTH];
     strcpy(error, "");
     FILE *fp;
+    
+    printf("octo v%s\n", VERSION);
     
     while ((option = getopt(argc, argv, cmdopts)) != -1) {
         switch (option) {
