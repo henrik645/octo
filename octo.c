@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <ctype.h>
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
@@ -47,10 +49,21 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
     }
 }
 
+void printUsage(char *programName) {
+    printf("Usage: %s [options] [filename]\n\n", programName);
+    printf("Options:\n");
+    printf(" -h: Displays help\n");
+    printf(" -p: Sets prompt\n");
+}
+
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
  */
 int main(int argc, char *argv[]) {
+    char option;
+    char cmdopts[] = "p:h";
+    opterr = 0;
+    
     char command;
     char commandStr[MAX_COMMAND_SIZE];
     int i;
@@ -88,10 +101,36 @@ int main(int argc, char *argv[]) {
     strcpy(error, "");
     FILE *fp;
     
-    if (argc < 1 || argc > 3) {
-        printf("Usage: %s [filename] [prompt]\n", argv[0]);
+    while ((option = getopt(argc, argv, cmdopts)) != -1) {
+        switch (option) {
+            case 'p':
+                prompt = optarg[0];
+                break;
+            case 'h':
+                printUsage(argv[0]);
+                return 0;
+                break;
+            case '?':
+                if (optopt == 'p') {
+                    fprintf(stderr, "Error: 'p' requires an argument.\n");
+                    return 1;
+                } else if (isprint(optopt)) {
+                    fprintf(stderr, "Error: Unknown option -%c\n", optopt);
+                    return 1;
+                } else {
+                    fprintf(stderr, "Error: Unknown option.");
+                    return 1;
+                }
+                break;
+            default:
+                abort();
+        }
+    }
+    
+    if (optind > argc + 1) { //Too many arguments
+        printUsage(argv[0]);
         exit(1);
-    } else if (argc == 2 || argc == 3) {
+    } else if (optind + 1 == argc) {
         fileExists = 1;
         strcpy(fileName, argv[1]);
         fp = fopen(argv[1], "r");
