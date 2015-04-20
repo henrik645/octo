@@ -155,8 +155,8 @@ int main(int argc, char *argv[]) {
             printf("Error: out of memory");
             free(buffer);
             exit(2);
-        }
         buffer = newBuffer;
+        }
         fp = fopen(argv[1], "r");
         x = 0; //Line counter
         z = 0; //Column counter
@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
                             if (range.start + 1 <= lines && range.end + 1 <= lines && range.start + 1 >= 1 && range.end + 1 >= 1) {
                                 memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end + 1) * SCREEN_WIDTH), ((range.end - range.start) + 1) * SCREEN_WIDTH * sizeof(char)); //Plus one since this is an inclusive delete
                             }
-                            if (lines - range.end - range.start + 1 > 0) {
+                            if (lines - (range.end - range.start) + 1 > 0) {
                                 lines -= range.end - range.start + 1;
                             } else {
                                 lines = 0;
