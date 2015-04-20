@@ -188,9 +188,14 @@ int main(int argc, char *argv[]) {
                     struct number endNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
                     i = endNumber.size; //endNumber.size was already initialized to i beforehand
                     if (endNumber.value >= 0) {
-                        isRange = 1;
-                        range.start = parsedNumber.value - 1;
-                        range.end = endNumber.value - 1;
+                        if (parsedNumber.value > 0 && parsedNumber.value < lines && endNumber.value > 0 && endNumber.value < lines) {
+                            isRange = 1;
+                            range.start = parsedNumber.value - 1;
+                            range.end = endNumber.value - 1;
+                        } else {
+                            printf("?\n");
+                            strcpy(error, "range limits out of range");
+                        }
                     } else {
                         strcpy(error, "wrongly formatted range");
                         printf("?\n");
