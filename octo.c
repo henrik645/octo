@@ -130,53 +130,48 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    if (optind > argc + 1) { //Too many arguments
+    if (argc - optind > 1) { //Too many arguments
         printUsage(argv[0]);
         exit(1);
     } else if (optind + 1 == argc) {
         fileExists = 1;
-        strcpy(fileName, argv[1]);
-        fp = fopen(argv[1], "r");
+        strcpy(fileName, argv[optind]);
+        fp = fopen(fileName, "r");
         if (fp == NULL) {
-            printf("%s: No such file or directory", argv[1]);
-            return 1;
-        }
-        while ((c = fgetc(fp)) != EOF) {
-            if (c == '\n') {
-                newLines++;
+            printf("new file\n");
+        } else {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c == '\n') {
+                    newLines++;
+                }
             }
-        }
-        newLines++;
-        fclose(fp);
-        lines = newLines;
-        
-        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
-        if (newBuffer == NULL) {
-            printf("Error: out of memory");
-            free(buffer);
-            exit(2);
-        }
-        buffer = newBuffer;
-        fp = fopen(argv[1], "r");
-        x = 0; //Line counter
-        z = 0; //Column counter
-        while ((c = fgetc(fp)) != EOF) {
-            if (c == '\n') {
-                z = 0;
-                x++;
-            } else {
-                *(buffer + (x * SCREEN_WIDTH) + z) = c;
-                z++;
-                fileChars++;
+            rewind(fp);
+            lines = newLines;
+            
+            newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
+            if (newBuffer == NULL) {
+                printf("Error: out of memory");
+                free(buffer);
+                exit(2);
             }
+            buffer = newBuffer;
+            x = 0; //Line counter
+            z = 0; //Column counter
+            while ((c = fgetc(fp)) != EOF) {
+                if (c == '\n') {
+                    z = 0;
+                    x++;
+                } else {
+                    *(buffer + (x * SCREEN_WIDTH) + z) = c;
+                    z++;
+                    fileChars++;
+                }
+            }
+            fclose(fp);
+            printf("%d\n", fileChars);
         }
-        fclose(fp);
-        printf("%d\n", fileChars);
     } else {
         fileExists = 0;
-    }
-    if (argc == 3) {
-        prompt = argv[3][0];
     }
     
     while(1) {
@@ -303,8 +298,7 @@ int main(int argc, char *argv[]) {
                             if (strcmp(inputLine, ".\n") == 0) {
                                 break;
                             } else if (strcmp(inputLine, "\n") == 0) {
-                                inputLine[0] = ' ';
-                                inputLine[1] = '\0';
+                                inputLine[0] = '\0';
                             } else {
                                 strtok(inputLine, "\n");
                             }
@@ -342,7 +336,7 @@ int main(int argc, char *argv[]) {
                             if (range.start + 1 <= lines && range.end + 1 <= lines && range.start + 1 >= 1 && range.end + 1 >= 1) {
                                 memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end + 1) * SCREEN_WIDTH), ((range.end - range.start) + 1) * SCREEN_WIDTH * sizeof(char)); //Plus one since this is an inclusive delete
                             }
-                            if (lines - range.end - range.start + 1 > 0) {
+                            if (lines - (range.end - range.start) + 1 > 0) {
                                 lines -= range.end - range.start + 1;
                             } else {
                                 lines = 0;
@@ -388,8 +382,7 @@ int main(int argc, char *argv[]) {
                                 break;
                             }
                             if (strcmp(inputLine, "\n") == 0) {
-                                inputLine[0] = ' ';
-                                inputLine[1] = '\0';
+                                inputLine[0] = '\0';
                             } else {
                                 strtok(inputLine, "\n");
                             }
@@ -755,6 +748,12 @@ int main(int argc, char *argv[]) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), copied + (x * SCREEN_WIDTH));
                         }
                         unsaved = 1;
+                        break;
+                    case '\t':
+                        break;
+                    case ' ':
+                        break;
+                    case '\n':
                         break;
                     default:
                         printf("?\n");
