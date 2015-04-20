@@ -302,8 +302,7 @@ int main(int argc, char *argv[]) {
                             if (strcmp(inputLine, ".\n") == 0) {
                                 break;
                             } else if (strcmp(inputLine, "\n") == 0) {
-                                inputLine[0] = ' ';
-                                inputLine[1] = '\0';
+                                inputLine[0] = '\0';
                             } else {
                                 strtok(inputLine, "\n");
                             }
@@ -387,7 +386,6 @@ int main(int argc, char *argv[]) {
                                 break;
                             }
                             if (strcmp(inputLine, "\n") == 0) {
-                                //inputLine[0] = ' ';
                                 inputLine[0] = '\0';
                             } else {
                                 strtok(inputLine, "\n");
