@@ -138,12 +138,7 @@ int main(int argc, char *argv[]) {
         strcpy(fileName, argv[optind]);
         fp = fopen(fileName, "r");
         if (fp == NULL) {
-            fp = fopen(fileName, "w");
-            if (fp == NULL) {
-                printf("Error when creating new file\n");
-                return 1;
-            }
-            fclose(fp);
+            printf("new file\n");
         } else {
             while ((c = fgetc(fp)) != EOF) {
                 if (c == '\n') {
