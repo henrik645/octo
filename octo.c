@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
         strcpy(fileName, argv[1]);
         fp = fopen(argv[1], "r");
         if (fp == NULL) {
-            printf("%s: No such file or directory", argv[1]);
+            printf("%s: No such file or directory\n", argv[1]);
             return 1;
         }
         while ((c = fgetc(fp)) != EOF) {
