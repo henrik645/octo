@@ -752,6 +752,12 @@ int main(int argc, char *argv[]) {
                         }
                         unsaved = 1;
                         break;
+                    case '\t':
+                        break;
+                    case ' ':
+                        break;
+                    case '\n':
+                        break;
                     default:
                         printf("?\n");
                         strcpy(commandStr, ""); //Empties commandStr, accepting no more commands after an error
