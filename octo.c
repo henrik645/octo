@@ -146,7 +146,6 @@ int main(int argc, char *argv[]) {
                 newLines++;
             }
         }
-        newLines++;
         rewind(fp);
         lines = newLines;
         
