@@ -130,15 +130,15 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    if (optind > argc + 1) { //Too many arguments
+    if (argc - optind > 1) { //Too many arguments
         printUsage(argv[0]);
         exit(1);
     } else if (optind + 1 == argc) {
         fileExists = 1;
-        strcpy(fileName, argv[1]);
-        fp = fopen(argv[1], "r");
+        strcpy(fileName, argv[optind]);
+        fp = fopen(fileName, "r");
         if (fp == NULL) {
-            printf("%s: No such file or directory\n", argv[1]);
+            printf("%s: No such file or directory\n", fileName);
             return 1;
         }
         while ((c = fgetc(fp)) != EOF) {
@@ -172,9 +172,6 @@ int main(int argc, char *argv[]) {
         printf("%d\n", fileChars);
     } else {
         fileExists = 0;
-    }
-    if (argc == 3) {
-        prompt = argv[3][0];
     }
     
     while(1) {
