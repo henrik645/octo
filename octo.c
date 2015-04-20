@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
                         range.start = parsedNumber.value - 1;
                         range.end = endNumber.value - 1;
                     } else {
-                        strcpy(error, "end of range negative");
+                        strcpy(error, "wrongly formatted range");
                         printf("?\n");
                         break;
                     }
