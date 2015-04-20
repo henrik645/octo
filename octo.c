@@ -138,38 +138,43 @@ int main(int argc, char *argv[]) {
         strcpy(fileName, argv[optind]);
         fp = fopen(fileName, "r");
         if (fp == NULL) {
-            printf("%s: No such file or directory\n", fileName);
-            return 1;
-        }
-        while ((c = fgetc(fp)) != EOF) {
-            if (c == '\n') {
-                newLines++;
+            fp = fopen(fileName, "w");
+            if (fp == NULL) {
+                printf("Error when creating new file\n");
+                return 1;
             }
-        }
-        rewind(fp);
-        lines = newLines;
-        
-        newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
-        if (newBuffer == NULL) {
-            printf("Error: out of memory");
-            free(buffer);
-            exit(2);
-        }
-        buffer = newBuffer;
-        x = 0; //Line counter
-        z = 0; //Column counter
-        while ((c = fgetc(fp)) != EOF) {
-            if (c == '\n') {
-                z = 0;
-                x++;
-            } else {
-                *(buffer + (x * SCREEN_WIDTH) + z) = c;
-                z++;
-                fileChars++;
+            fclose(fp);
+        } else {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c == '\n') {
+                    newLines++;
+                }
             }
+            rewind(fp);
+            lines = newLines;
+            
+            newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
+            if (newBuffer == NULL) {
+                printf("Error: out of memory");
+                free(buffer);
+                exit(2);
+            }
+            buffer = newBuffer;
+            x = 0; //Line counter
+            z = 0; //Column counter
+            while ((c = fgetc(fp)) != EOF) {
+                if (c == '\n') {
+                    z = 0;
+                    x++;
+                } else {
+                    *(buffer + (x * SCREEN_WIDTH) + z) = c;
+                    z++;
+                    fileChars++;
+                }
+            }
+            fclose(fp);
+            printf("%d\n", fileChars);
         }
-        fclose(fp);
-        printf("%d\n", fileChars);
     } else {
         fileExists = 0;
     }
