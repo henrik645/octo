@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
             }
         }
         newLines++;
-        fclose(fp);
+        rewind(fp);
         lines = newLines;
         
         newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
@@ -155,9 +155,8 @@ int main(int argc, char *argv[]) {
             printf("Error: out of memory");
             free(buffer);
             exit(2);
-        buffer = newBuffer;
         }
-        fp = fopen(argv[1], "r");
+        buffer = newBuffer;
         x = 0; //Line counter
         z = 0; //Column counter
         while ((c = fgetc(fp)) != EOF) {
