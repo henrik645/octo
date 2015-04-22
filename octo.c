@@ -6,7 +6,7 @@
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
-#define VERSION "0.2"
+#define VERSION "0.3"
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
