@@ -266,6 +266,7 @@ int main(int argc, char *argv[]) {
                             *(buffer + (line * SCREEN_WIDTH) + x) = 0;
                         }
                         strcpy(buffer + (line * SCREEN_WIDTH), lineContents);
+			unsaved = 1;
                         break;
                     case 'p':
                         if (isRange) {
@@ -403,6 +404,7 @@ int main(int argc, char *argv[]) {
                             strcpy(input + (linesInputted * SCREEN_WIDTH * sizeof(char)), inputLine);
                             linesInputted++;
                         }
+			int previousLines = lines;
                         lines += linesInputted; //Adds to the buffer
                         newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
