@@ -55,6 +55,7 @@ void printUsage(char *programName) {
     printf("Options:\n");
     printf(" -h: Displays help\n");
     printf(" -p: Sets prompt\n");
+    printf(" -v: Displays version\n");
 }
 
 /* Parses a command and performs an action. Returns 1 when encountered with an error
@@ -62,7 +63,7 @@ void printUsage(char *programName) {
  */
 int main(int argc, char *argv[]) {
     char option;
-    char cmdopts[] = "p:h";
+    char cmdopts[] = "p:hv";
     opterr = 0;
     
     char command;
@@ -113,6 +114,12 @@ int main(int argc, char *argv[]) {
                 printUsage(argv[0]);
                 return 0;
                 break;
+	    case 'v':
+		printf("See http://github.com/henrik645/octo for more details.\n\n");
+		printf("Copyright 2015.\n");
+		printf("Licensed by the MIT License.\n");
+		return 0;
+		break;
             case '?':
                 if (optopt == 'p') {
                     fprintf(stderr, "Error: 'p' requires an argument.\n");
