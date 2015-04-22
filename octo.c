@@ -404,7 +404,6 @@ int main(int argc, char *argv[]) {
                             strcpy(input + (linesInputted * SCREEN_WIDTH * sizeof(char)), inputLine);
                             linesInputted++;
                         }
-			int previousLines = lines;
                         lines += linesInputted; //Adds to the buffer
                         newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
                         if (newBuffer == NULL) {
