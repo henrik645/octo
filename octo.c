@@ -558,7 +558,7 @@ int main(int argc, char *argv[]) {
                         unsaved = 1;
                         break;
                     case 'T':
-                        if (line + 1 <= lines && line > 1) {
+                        if (line + 1 <= lines && line + 1 >= 1) {
                             strcpy(templine, buffer + ((line - 1) * SCREEN_WIDTH));
                             strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
                             strcpy(buffer + (line * SCREEN_WIDTH), templine);
