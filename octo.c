@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                         } else {
-                            if (line + 1 > lines || line < 1) {
+                            if (line + 1 > lines || line + 1 < 1) {
                                 strcpy(error, "line entered is outside limits");
                                 printf("?\n");
                             } else {
@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
                                 }
                             }
                         } else {
-                            if (line + 1 > lines || line < 1) {
+                            if (line + 1 > lines || line + 1 < 1) {
                                 strcpy(error, "line entered is outside limits");
                                 printf("?\n");
                             } else {
