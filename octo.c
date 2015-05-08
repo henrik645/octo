@@ -434,7 +434,9 @@ int main(int argc, char *argv[]) {
                             for (x = 0; x < lines; x++) {
                                 for (z = 0; z < SCREEN_WIDTH - 1; z++) {
                                     c = *(buffer + (x * SCREEN_WIDTH) + z);
-                                    if (c != 0) {
+                                    if (c == 0) {
+                                        break;
+                                    } else {
                                         fputc(c, fp); //Outputs the character to file
                                         fileChars++;
                                     }
