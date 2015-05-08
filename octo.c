@@ -574,7 +574,6 @@ int main(int argc, char *argv[]) {
                         } else {
                             printf("%s\n", error);
                         }
-                        unsaved = 1;
                         break;
                     case 'f':
                         printf("Search: ");
