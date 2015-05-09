@@ -16,6 +16,8 @@ char error[SCREEN_WIDTH];
 char *buffer = NULL;
 char *newBuffer = NULL;
 int unsaved = 0; //Set to 1 when there are unsaved changes
+int file_exists = 0;
+char file_name[SCREEN_WIDTH];
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -60,7 +62,7 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
 }
 
 void printUsage(char *programName) {
-    printf("Usage: %s [options] [filename]\n\n", programName);
+    printf("Usage: %s [options] [file_name]\n\n", programName);
     printf("Options:\n");
     printf(" -h: Displays help\n");
     printf(" -p: Sets prompt\n");
@@ -237,6 +239,52 @@ void delete_lines(int start, int end) {
         lines = 0;
     }
 }
+
+int write_file_name(char file_name[SCREEN_WIDTH]) {
+    int i = 0;
+    int x = 0;
+    int file_chars = 0;
+    char c;
+    
+    FILE *fp = fopen(file_name, "w");
+    if (fp == NULL) {
+        strcpy(error, "could not open file for writing");
+        return 1;
+    }
+    
+    fp = fopen(file_name, "w");
+    for (i = 0; i < lines; i++) {
+        for (x = 0; x < SCREEN_WIDTH - 1; x++) {
+            c = *(buffer + (i * SCREEN_WIDTH) + x);
+            if (c == 0) {
+                break;
+            } else {
+                fputc(c, fp); //Outputs the character to file
+                file_chars++;
+            }
+        }
+        fputc('\n', fp); //Puts a newline after every line
+    }
+    fclose(fp);
+    printf("%d\n", file_chars);
+    unsaved = 0;
+    
+    return 0;
+}
+
+int write_file() {
+    int file_chars = 0;
+    
+    if (file_exists) {
+        return write_file_name(file_name);
+    }
+
+    printf("File: ");
+    fgets(file_name, SCREEN_WIDTH, stdin);
+    strtok(file_name, "\n"); //Removes the trailing newline
+    
+    return write_file_name(file_name);
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -247,7 +295,7 @@ int main(int argc, char *argv[]) {
     opterr = 0;
     
     char command;
-    char commandStr[MAX_COMMAND_SIZE];
+    char command_str[MAX_COMMAND_SIZE];
     int i;
     int linesInputted;
     int isRange = 0;
@@ -259,8 +307,6 @@ int main(int argc, char *argv[]) {
     int c;
     int x;
     int z;
-    int fileExists;
-    char fileName[SCREEN_WIDTH];
     char prompt = ':';
     char templine[SCREEN_WIDTH]; //Temporary files for use in the transpose command
     char inputLine[SCREEN_WIDTH];
@@ -321,9 +367,9 @@ int main(int argc, char *argv[]) {
         printUsage(argv[0]);
         exit(1);
     } else if (optind + 1 == argc) {
-        fileExists = 1;
-        strcpy(fileName, argv[optind]);
-        fp = fopen(fileName, "r");
+        file_exists = 1;
+        strcpy(file_name, argv[optind]);
+        fp = fopen(file_name, "r");
         if (fp == NULL) {
             printf(NEW_FILE);
         } else {
@@ -358,22 +404,22 @@ int main(int argc, char *argv[]) {
             printf("%d\n", fileChars);
         }
     } else {
-        fileExists = 0;
+        file_exists = 0;
         printf(NEW_FILE);
     }
     
     while(1) {
         printf("%c", prompt);
-        fgets(commandStr, MAX_COMMAND_SIZE, stdin);
-        strtok(commandStr, "\n"); //Strips the newline away
-        for (i = 0; i < strlen(commandStr);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
-            command = commandStr[i];
-            parsedNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
+        fgets(command_str, MAX_COMMAND_SIZE, stdin);
+        strtok(command_str, "\n"); //Strips the newline away
+        for (i = 0; i < strlen(command_str);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
+            command = command_str[i];
+            parsedNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
             if (parsedNumber.value >= 0) { //Input is number
                 i = parsedNumber.size; //parsedNumber.size was already initialized to i beforehand
-                if (commandStr[i] == ',') {
+                if (command_str[i] == ',') {
                     i++; //Removes the ','
-                    struct number endNumber = parseInt(commandStr, MAX_NUMBER_LEN, i);
+                    struct number endNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
                     i = endNumber.size; //endNumber.size was already initialized to i beforehand
                     if (endNumber.value >= 0) {
                         if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines) {
@@ -435,62 +481,21 @@ int main(int argc, char *argv[]) {
                         insert_lines(line + 1);
                         break;
                     case 'w':
-                        fileChars = 0;
-                        if (fileExists == 1) {
-                            fp = fopen(fileName, "w");
-                            for (x = 0; x < lines; x++) {
-                                for (z = 0; z < SCREEN_WIDTH - 1; z++) {
-                                    c = *(buffer + (x * SCREEN_WIDTH) + z);
-                                    if (c == 0) {
-                                        break;
-                                    } else {
-                                        fputc(c, fp); //Outputs the character to file
-                                        fileChars++;
-                                    }
-                                }
-                                fputc('\n', fp); //Puts a newline after every line
-                            }
-                            fclose(fp);
-                            printf("%d\n", fileChars);
-                            unsaved = 0;
-                        } else {
-                            printf("File: ");
-                            fgets(fileName, SCREEN_WIDTH, stdin);
-                            strtok(fileName, "\n"); //Removes the trailing newline
-                            fp = fopen(fileName, "w");
-                            if (fp == NULL) {
-                                printf("!");
-                                strcpy(error, "file not found");
-                                fileExists = 0;
-                            } else {
-                                fileExists = 1;
-                                for (x = 0; x < lines; x++) {
-                                    for (z = 0; z < SCREEN_WIDTH - 1; z++) {
-                                        c = *(buffer + (x * SCREEN_WIDTH) + z);
-                                        if (c != 0) {
-                                            fputc(c, fp);
-                                            fileChars++;
-                                        }
-                                    }
-                                    fputc('\n', fp);
-                                }
-                                fclose(fp);
-                                printf("%d\n", fileChars);
-                                unsaved = 0;
-                            }
+                        if (write_file() != 0) {
+                            strcpy(command_str, ""); //Prevents octo from executing any quit commands as an error occured and the file isn't saved.
                         }
                         break;
                     case 'W':
                         printf("File: ");
-                        fgets(fileName, SCREEN_WIDTH, stdin);
-                        strtok(fileName, "\n"); //Removes the trailing newline
-                        fp = fopen(fileName, "w");
+                        fgets(file_name, SCREEN_WIDTH, stdin);
+                        strtok(file_name, "\n"); //Removes the trailing newline
+                        fp = fopen(file_name, "w");
                         if (fp == NULL) {
                             printf("!\n");
                             strcpy(error, "file not found");
-                            strcpy(fileName, "\0"); //Empties the filename
+                            strcpy(file_name, "\0"); //Empties the file_name
                         } else {
-                            fileExists = 1;
+                            file_exists = 1;
                             fileChars = 0;
                             for (x = 0; x < lines; x++) {
                                 for (z = 0; z < SCREEN_WIDTH - 1; z++) {
@@ -510,15 +515,15 @@ int main(int argc, char *argv[]) {
                     case 'o':
                         if (unsaved == 0) {
                             printf("File: ");
-                            fgets(fileName, SCREEN_WIDTH, stdin);
-                            strtok(fileName, "\n"); //Removes the trailing newline
-                            fp = fopen(fileName, "r");
+                            fgets(file_name, SCREEN_WIDTH, stdin);
+                            strtok(file_name, "\n"); //Removes the trailing newline
+                            fp = fopen(file_name, "r");
                             if (fp == NULL) {
                                 printf("!\n");
                                 strcpy(error, "file not found");
-                                fileExists = 0;
+                                file_exists = 0;
                             } else {
-                                fileExists = 1;
+                                file_exists = 1;
                                 fileLines = 0;
                                 while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
                                     if (c == '\n') {
@@ -811,7 +816,7 @@ int main(int argc, char *argv[]) {
                         break;
                     default:
                         printf("?\n");
-                        strcpy(commandStr, ""); //Empties commandStr, accepting no more commands after an error
+                        strcpy(command_str, ""); //Empties command_str, accepting no more commands after an error
                         strcpy(error, "unknown command");
                         break;
                 }
