@@ -481,17 +481,27 @@ void set_surround() {
 void copy_line(int line) {
     char copy_line[SCREEN_WIDTH];
     
-    strcpy(copy_line, buffer + (line * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-    copied = update_buffer(copied, copy_lines + 1 * SCREEN_WIDTH * sizeof(char));
-    strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
-    copy_lines++;
+    if (line + 1 >= 1 && line + 1 <= lines) {
+        strcpy(copy_line, buffer + (line * SCREEN_WIDTH)); //Copies one line at a time to copyLine
+        copied = update_buffer(copied, copy_lines + 1 * SCREEN_WIDTH * sizeof(char));
+        strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
+        copy_lines++;
+    } else {
+        printf("?\n");
+        strcpy(error, "line out of range");
+    }
 }
 
 void copy_line_range(int start, int end) {
     int i;
     
-    for (i = start; i <= end; i++) {
-        copy_line(i);
+    if (start >= 1 && start <= lines && end >= 1 && end <= lines) {
+        for (i = start; i <= end; i++) {
+            copy_line(i);
+        }
+    } else {
+        printf("?\n");
+        strcpy(error, "lines out of range");
     }
 }
 
