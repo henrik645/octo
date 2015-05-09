@@ -14,7 +14,7 @@
 int lines = 0; //Total amount of lines, not shifted
 char error[SCREEN_WIDTH];
 char *buffer = NULL;
-char *newBuffer = NULL;
+char *new_buffer = NULL;
 int unsaved = 0; //Set to 1 when there are unsaved changes
 int file_exists = 0;
 char file_name[SCREEN_WIDTH];
@@ -116,13 +116,13 @@ void change_line(int line) {
     
     if (line + 1 > lines) {
         lines = line + 1;
-        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
-        if (newBuffer == NULL) {
+        new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
+        if (new_buffer == NULL) {
             fprintf(stderr, "Error: out of memory");
             free(buffer);
             exit(2);
         }
-        buffer = newBuffer;
+        buffer = new_buffer;
     }
     fgets(lineContents, SCREEN_WIDTH, stdin);
     if (strcmp(lineContents, "\n") == 0) {
@@ -163,23 +163,23 @@ void print_lines(int start, int end) {
 
 void insert_line(char line[SCREEN_WIDTH], int current_line) {
     lines++;
-    newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
-    if (newBuffer == NULL) {
+    new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
+    if (new_buffer == NULL) {
         fprintf(stderr, "Error: out of memory");
         free(buffer);
         exit(2);
     }
-    buffer = newBuffer;
+    buffer = new_buffer;
     memmove(buffer + ((current_line + 1) * SCREEN_WIDTH), buffer + (current_line * SCREEN_WIDTH), (lines - current_line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
     strcpy(buffer + current_line * SCREEN_WIDTH, line);
     
-    newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
-    if (newBuffer == NULL) {
+    new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
+    if (new_buffer == NULL) {
         fprintf(stderr, "Error deleting line");
         free(buffer);
         exit(2);
     }
-    buffer = newBuffer;
+    buffer = new_buffer;
     
     unsaved = 1;
 }
@@ -286,6 +286,70 @@ int write_file() {
     
     return write_file_name(file_name);
 }
+
+void open_file() {
+    int file_lines = 0;
+    int file_chars = 0;
+    int c; // int needed for proper handling of EOF
+    int y = 0;
+    int x = 0;
+    int longest_line = 0;
+    char file_name[SCREEN_WIDTH];
+    FILE *fp;
+    
+    printf("File: ");
+    fgets(file_name, SCREEN_WIDTH, stdin);
+    strtok(file_name, "\n"); //Removes the trailing newline
+    fp = fopen(file_name, "r");
+    if (fp == NULL) {
+        printf("!\n");
+        strcpy(error, "file not found");
+        file_exists = 0;
+    } else {
+        file_exists = 1;
+        while ((c = fgetc(fp)) != EOF) { //Counts the file sixe for sizing of the buffer
+            if (c == '\n') {
+                file_lines++;
+                if (file_chars > longest_line) {
+                    longest_line = file_chars;
+                }
+            } else {
+                file_chars++;
+            }
+        }
+
+        file_chars = 0;
+        
+        if (longest_line > SCREEN_WIDTH) {
+            file_exists = 0;
+            strcpy(error, "file is wider than screen width");
+            printf("!\n");
+        } else {
+            lines = file_lines;
+            new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
+            if (new_buffer == NULL) {
+                fprintf(stderr, "Error: out of memory\n");
+                fclose(fp);
+                exit(1);
+            }
+            buffer = new_buffer;
+            rewind(fp); //Rewinds the file for reading actual file contents
+            
+            while ((c = fgetc(fp)) != EOF) {
+                if (c == '\n') {
+                    x = 0;
+                    y++;
+                } else {
+                    *(buffer + (y * SCREEN_WIDTH) + x) = c;
+                    x++;
+                    file_chars++;
+                }
+            }
+            fclose(fp);
+            printf("%d\n", file_chars);
+        }
+    }
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -382,13 +446,13 @@ int main(int argc, char *argv[]) {
             rewind(fp);
             lines = newLines;
             
-            newBuffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
-            if (newBuffer == NULL) {
+            new_buffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
+            if (new_buffer == NULL) {
                 printf("Error: out of memory");
                 free(buffer);
                 exit(2);
             }
-            buffer = newBuffer;
+            buffer = new_buffer;
             x = 0; //Line counter
             z = 0; //Column counter
             while ((c = fgetc(fp)) != EOF) {
@@ -498,47 +562,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'o':
                         if (unsaved == 0) {
-                            printf("File: ");
-                            fgets(file_name, SCREEN_WIDTH, stdin);
-                            strtok(file_name, "\n"); //Removes the trailing newline
-                            fp = fopen(file_name, "r");
-                            if (fp == NULL) {
-                                printf("!\n");
-                                strcpy(error, "file not found");
-                                file_exists = 0;
-                            } else {
-                                file_exists = 1;
-                                fileLines = 0;
-                                while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
-                                    if (c == '\n') {
-                                        fileLines++;
-                                    }
-                                }
-                                lines = fileLines;
-                                newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
-                                if (newBuffer == NULL) {
-                                    fprintf(stderr, "Error: out of memory\n");
-                                    fclose(fp);
-                                    exit(1);
-                                }
-                                buffer = newBuffer;
-                                rewind(fp); //Rewinds the file for reading actual file contents
-                                x = 0;
-                                z = 0;
-                                fileChars = 0;
-                                while ((c = fgetc(fp)) != EOF) {
-                                    if (c == '\n') {
-                                        z = 0;
-                                        x++;
-                                    } else {
-                                        *(buffer + (x * SCREEN_WIDTH) + z) = c;
-                                        z++;
-                                        fileChars++;
-                                    }
-                                }
-                                fclose(fp);
-                                printf("%d\n", fileChars);
-                            }
+                            open_file();
                         } else {
                             printf("!\n");
                             strcpy(error, "unsaved changes");
@@ -686,12 +710,12 @@ int main(int argc, char *argv[]) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
                                 for (x = range.start; x <= range.end; x++) {
                                     strcpy(copyLine, buffer + (x * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-                                    newBuffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
-                                    if (newBuffer == NULL) {
+                                    new_buffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
+                                    if (new_buffer == NULL) {
                                         printf("Error: out of memory\n");
                                         exit(1);
                                     }
-                                    copied = newBuffer;
+                                    copied = new_buffer;
                                     strcpy(copied + (copyLines * SCREEN_WIDTH), copyLine);
                                     copyLines++;
                                 }
@@ -701,12 +725,12 @@ int main(int argc, char *argv[]) {
                             }
                         } else {
                             if (line >= 0 && line < lines) {
-                                newBuffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
-                                if (newBuffer == NULL) {
+                                new_buffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
+                                if (new_buffer == NULL) {
                                     printf("Error: out of memory\n");
                                     exit(1);
                                 }
-                                copied = newBuffer;
+                                copied = new_buffer;
                                 strcpy(copied, buffer + (line * SCREEN_WIDTH));
                                 copyLines = 1;
                             } else {
@@ -723,12 +747,12 @@ int main(int argc, char *argv[]) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
                                 for (x = range.start; x <= range.end; x++) {
                                     strcpy(copyLine, buffer + (x * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-                                    newBuffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
-                                    if (newBuffer == NULL) {
+                                    new_buffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
+                                    if (new_buffer == NULL) {
                                         printf("Error: out of memory\n");
                                         exit(1);
                                     }
-                                    copied = newBuffer;
+                                    copied = new_buffer;
                                     strcpy(copied + (copyLines * SCREEN_WIDTH), copyLine);
                                     copyLines++;
                                 }
@@ -738,12 +762,12 @@ int main(int argc, char *argv[]) {
                             }
                         } else {
                             if (line >= 0 && line < lines) {
-                                newBuffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
-                                if (newBuffer == NULL) {
+                                new_buffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
+                                if (new_buffer == NULL) {
                                     printf("Error: out of memory\n");
                                     exit(1);
                                 }
-                                copied = newBuffer;
+                                copied = new_buffer;
                                 strcpy(copied, buffer + (line * SCREEN_WIDTH));
                                 copyLines = 1;
                             } else {
@@ -768,24 +792,24 @@ int main(int argc, char *argv[]) {
                             }
                             lines--; //Removes the upper lines
                         }
-                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
-                        if (newBuffer == NULL) {
+                        new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
+                        if (new_buffer == NULL) {
                             fprintf(stderr, "Error cutting line");
                             free(buffer);
                             exit(2);
                         }
-                        buffer = newBuffer;
+                        buffer = new_buffer;
                         unsaved = 1;
                         break;
                     case 'v':
                         lines += copyLines; //Adds the newly copied lines
-                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
-                        if (newBuffer == NULL) {
+                        new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
+                        if (new_buffer == NULL) {
                             fprintf(stderr, "Error: out of memory");
                             free(buffer);
                             exit(2);
                         }
-                        buffer = newBuffer;
+                        buffer = new_buffer;
                         memmove(buffer + ((line + copyLines) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - copyLines) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
                         for (x = 0; x < copyLines; x++) {
                             strcpy(buffer + ((line + x) * SCREEN_WIDTH), copied + (x * SCREEN_WIDTH));
