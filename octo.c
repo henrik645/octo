@@ -8,7 +8,8 @@
 #define SCREEN_WIDTH 80
 #define VERSION "0.3"
 #define NEW_FILE "new file\n"
-#define SURROUND 10 //The number of lines in each direction the surround command prints out
+#define SURROUND 10
+/* The number of lines in each direction the surround command prints out */
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -104,6 +105,10 @@ int main(int argc, char *argv[]) {
     char copyLine[SCREEN_WIDTH];
     strcpy(error, "");
     FILE *fp;
+    int extralength = 0; //Used by the search and replace function for moving memory on line
+    int bytes = 0;
+    int to = 0;
+    int from = 0;
     
     printf("octo v%s\n", VERSION);
     
@@ -617,7 +622,12 @@ int main(int argc, char *argv[]) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
                                 for (x = range.start; x <= range.end; x++) {
                                     if ((replaceptr = strstr(buffer + (x * SCREEN_WIDTH), searchstr)) != NULL) { //match was found
-                                        for (z = 0; z <= strlen(replacestr); z++) {
+                                        extralength = strlen(replacestr) - strlen(searchstr);
+                                        bytes = SCREEN_WIDTH - (((replaceptr + strlen(searchstr)) - buffer) % SCREEN_WIDTH) - extralength;
+                                        to = (replaceptr + strlen(searchstr) - buffer) % SCREEN_WIDTH;
+                                        from = (replaceptr + strlen(searchstr) + extralength - buffer) % SCREEN_WIDTH;
+                                        memmove(buffer + from + (x * SCREEN_WIDTH), buffer + to + (x * SCREEN_WIDTH), bytes);
+                                        for (z = 0; z <= strlen(replacestr) && replacestr[z] != '\0'; z++) {
                                             *(replaceptr + z) = replacestr[z];
                                         }
                                     }
@@ -629,7 +639,12 @@ int main(int argc, char *argv[]) {
                         } else {
                             if (line >= 0 && line < lines) {
                                 if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH), searchstr)) != NULL) {
-                                    for (x = 0; x <= strlen(replacestr); x++) {
+                                    extralength = strlen(replacestr) - strlen(searchstr);
+                                    bytes = SCREEN_WIDTH - (((replaceptr + strlen(searchstr)) - buffer) % SCREEN_WIDTH) - extralength;
+                                    to = (replaceptr + strlen(searchstr) - buffer) % SCREEN_WIDTH;
+                                    from = (replaceptr + strlen(searchstr) + extralength - buffer) % SCREEN_WIDTH;
+                                    memmove(buffer + from + (line * SCREEN_WIDTH), buffer + to + (line * SCREEN_WIDTH), bytes);
+                                    for (x = 0; x <= strlen(replacestr) && replacestr[x] != '\0'; x++) {
                                         *(replaceptr + x) = replacestr[x];
                                     }
                                 }
