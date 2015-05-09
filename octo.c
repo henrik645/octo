@@ -482,7 +482,7 @@ void copy_line(int line) {
     char copy_line[SCREEN_WIDTH];
     
     strcpy(copy_line, buffer + (line * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-    buffer = update_buffer(copied, copy_lines + 1 * SCREEN_WIDTH * sizeof(char));
+    copied = update_buffer(copied, copy_lines + 1 * SCREEN_WIDTH * sizeof(char));
     strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
     copy_lines++;
 }
