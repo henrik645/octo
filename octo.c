@@ -442,16 +442,6 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
     }
 }
 
-void select_all() {
-    if (lines > 0) {
-        isRange = 1;
-        range.start = 0;
-        range.end = lines - 1;
-    } else {
-        line = 0;
-    }
-}
-
 void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
     int i = 0;
 
@@ -462,6 +452,16 @@ void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char
     } else {
         printf("?\n");
         strcpy(error, "lines out of range");
+    }
+}
+
+void select_all() {
+    if (lines > 0) {
+        isRange = 1;
+        range.start = 0;
+        range.end = lines - 1;
+    } else {
+        line = 0;
     }
 }
     
