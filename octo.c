@@ -7,6 +7,7 @@
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
 #define VERSION "0.3"
+#define NEW_FILE "new file\n"
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -145,7 +146,7 @@ int main(int argc, char *argv[]) {
         strcpy(fileName, argv[optind]);
         fp = fopen(fileName, "r");
         if (fp == NULL) {
-            printf("new file\n");
+            printf(NEW_FILE);
         } else {
             while ((c = fgetc(fp)) != EOF) {
                 if (c == '\n') {
@@ -179,6 +180,7 @@ int main(int argc, char *argv[]) {
         }
     } else {
         fileExists = 0;
+        printf(NEW_FILE);
     }
     
     while(1) {
