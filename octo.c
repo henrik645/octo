@@ -442,6 +442,16 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
     }
 }
 
+void select_all() {
+    if (lines > 0) {
+        isRange = 1;
+        range.start = 0;
+        range.end = lines - 1;
+    } else {
+        line = 0;
+    }
+}
+
 void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
     int i = 0;
 
@@ -709,13 +719,7 @@ int main(int argc, char *argv[]) {
                         unsaved = 1;
                         break;
                     case '@':
-                        if (lines > 0) {
-                            isRange = 1;
-                            range.start = 0;
-                            range.end = lines - 1;
-                        } else {
-                            line = 0;
-                        }
+                        select_all();
                         break;
                     case '!':
                         unsaved = 0;
