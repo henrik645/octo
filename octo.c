@@ -377,6 +377,15 @@ void transpose_previous(int line) {
         printf("?\n");
     }
 }
+
+void print_help() {
+    if (error[0] == '\0') {
+        strcpy(error, "no error found");
+        printf("?\n");
+    } else {
+        printf("%s\n", error);
+    }
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -602,12 +611,7 @@ int main(int argc, char *argv[]) {
                         transpose_previous(line);
                         break;
                     case 'h':
-                        if (error[0] == '\0') {
-                            strcpy(error, "no error found");
-                            printf("?\n");
-                        } else {
-                            printf("%s\n", error);
-                        }
+                        print_help();
                         break;
                     case 'f':
                         printf("Search: ");
