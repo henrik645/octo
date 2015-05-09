@@ -434,7 +434,7 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
                 for (i = 0; i <= strlen(replacestr) && replacestr[i] != '\0'; i++) {
                     *(replaceptr + i) = replacestr[i];
                 }
-                lineoffset += to;
+                lineoffset += strlen(replacestr);
             } else {
                 break;
             }
