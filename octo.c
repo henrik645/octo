@@ -408,6 +408,52 @@ void find_in_range(int start, int stop, char searchstr[SCREEN_WIDTH]) {
         }
     }
 }
+
+void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
+    int i = 0;
+    int lineoffset = 0;
+    int extralength = 0;
+    char *replaceptr = NULL;
+    int bytes;
+    int to;
+    int from;
+    
+    if (line >= 0 && line < lines) {
+        while (1) {
+            if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) {
+                extralength = strlen(replacestr) - strlen(searchstr);
+                
+                bytes = SCREEN_WIDTH - (((replaceptr + strlen(searchstr)) - buffer) % SCREEN_WIDTH) - extralength;
+                to = (replaceptr + strlen(searchstr) - buffer) % SCREEN_WIDTH;
+                from = (replaceptr + strlen(searchstr) + extralength - buffer) % SCREEN_WIDTH;
+                
+                memmove(buffer + from + (line * SCREEN_WIDTH), buffer + to + (line * SCREEN_WIDTH), bytes);
+                for (i = 0; i <= strlen(replacestr) && replacestr[i] != '\0'; i++) {
+                    *(replaceptr + i) = replacestr[i];
+                }
+                lineoffset += to;
+            } else {
+                break;
+            }
+        }
+    } else {
+        printf("?\n");
+        strcpy(error, "line out of range");
+    }
+}
+
+void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
+    int i = 0;
+
+    if (start >= 0 && start < lines && start >= 0 && start < lines) {
+        for (i = start; i <= end; i++) {
+            search_replace(i, searchstr, replacestr);
+        }
+    } else {
+        printf("?\n");
+        strcpy(error, "lines out of range");
+    }
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -654,53 +700,11 @@ int main(int argc, char *argv[]) {
                         printf("Replace: ");
                         fgets(replacestr, SCREEN_WIDTH, stdin);
                         strtok(replacestr, "\n");
-                        lineoffset = 0;
 
                         if (isRange == 1) {
-                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
-                                for (x = range.start; x <= range.end; x++) {
-                                    lineoffset = 0;
-                                    while (1) {
-                                        if ((replaceptr = strstr(buffer + (x * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) { //match was found
-                                            extralength = strlen(replacestr) - strlen(searchstr);
-                                            bytes = SCREEN_WIDTH - (((replaceptr + strlen(searchstr)) - buffer) % SCREEN_WIDTH) - extralength;
-                                            to = (replaceptr + strlen(searchstr) - buffer) % SCREEN_WIDTH;
-                                            from = (replaceptr + strlen(searchstr) + extralength - buffer) % SCREEN_WIDTH;
-                                            memmove(buffer + from + (x * SCREEN_WIDTH), buffer + to + (x * SCREEN_WIDTH), bytes);
-                                            for (z = 0; z <= strlen(replacestr) && replacestr[z] != '\0'; z++) {
-                                                *(replaceptr + z) = replacestr[z];
-                                            }
-                                            lineoffset += to;
-                                        } else {
-                                            break;
-                                        }
-                                    }
-                                }
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "lines out of range");
-                            }
+                            search_replace_range(range.start, range.end, searchstr, replacestr);
                         } else {
-                            if (line >= 0 && line < lines) {
-                                while (1) {
-                                    if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) {
-                                        extralength = strlen(replacestr) - strlen(searchstr);
-                                        bytes = SCREEN_WIDTH - (((replaceptr + strlen(searchstr)) - buffer) % SCREEN_WIDTH) - extralength;
-                                        to = (replaceptr + strlen(searchstr) - buffer) % SCREEN_WIDTH;
-                                        from = (replaceptr + strlen(searchstr) + extralength - buffer) % SCREEN_WIDTH;
-                                        memmove(buffer + from + (line * SCREEN_WIDTH), buffer + to + (line * SCREEN_WIDTH), bytes);
-                                        for (x = 0; x <= strlen(replacestr) && replacestr[x] != '\0'; x++) {
-                                            *(replaceptr + x) = replacestr[x];
-                                        }
-                                        lineoffset += to;
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "line out of range");
-                            }
+                            search_replace(line, searchstr, replacestr);
                         }
                         unsaved = 1;
                         break;
