@@ -629,7 +629,11 @@ int main(int argc, char *argv[]) {
                 line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
             } else {
                 if (line + 1 > lines || line + 1 < 1) {
-                    line = lines;
+                    if (lines == 0) {
+                        line = lines;
+                    } else {
+                        line = lines - 1;
+                    }
                 }
                 switch (command) {
                     case 'q':
@@ -713,19 +717,28 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 's':
-                        printf("Search: ");
-                        fgets(searchstr, SCREEN_WIDTH, stdin);
-                        strtok(searchstr, "\n");
-                        printf("Replace: ");
-                        fgets(replacestr, SCREEN_WIDTH, stdin);
-                        strtok(replacestr, "\n");
+                        if ((isRange && range.start >= 1 && range.start <= lines && range.end >= 1 && range.end <= lines) || (!isRange && line >= 1 && line <= lines)) {
+                            printf("Search: ");
+                            fgets(searchstr, SCREEN_WIDTH, stdin);
+                            strtok(searchstr, "\n");
+                            printf("Replace: ");
+                            fgets(replacestr, SCREEN_WIDTH, stdin);
+                            strtok(replacestr, "\n");
 
-                        if (isRange == 1) {
-                            search_replace_range(range.start, range.end, searchstr, replacestr);
+                            if (isRange == 1) {
+                                search_replace_range(range.start, range.end, searchstr, replacestr);
+                            } else {
+                                search_replace(line, searchstr, replacestr);
+                            }
+                            unsaved = 1;
                         } else {
-                            search_replace(line, searchstr, replacestr);
+                            printf("?\n");
+                            if (isRange) {
+                                strcpy(error, "lines out of range");
+                            } else {
+                                strcpy(error, "line out of range");
+                            }
                         }
-                        unsaved = 1;
                         break;
                     case '@':
                         select_all();
