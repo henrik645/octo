@@ -386,6 +386,28 @@ void print_help() {
         printf("%s\n", error);
     }
 }
+
+int find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
+    if (line >= 0 && line < lines) {
+        if (strstr(buffer + (line * SCREEN_WIDTH), searchstr) != NULL) { //match was found
+            return 1;
+        }
+    } else {
+        printf("?\n");
+        strcpy(error, "line out of range");
+    }
+    return 0;
+}
+
+void find_in_range(int start, int stop, char searchstr[SCREEN_WIDTH]) {
+    int i = 0;
+
+    for (i = start; i <= stop; i++) {
+        if (find_in_line(i, searchstr)) {
+            printf("%d\t%s\n", i + 1, buffer + (i * SCREEN_WIDTH));
+        }
+    }
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -618,24 +640,10 @@ int main(int argc, char *argv[]) {
                         fgets(searchstr, SCREEN_WIDTH, stdin);
                         strtok(searchstr, "\n"); //Removes trailing newline
                         if (isRange == 1) {
-                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
-                                for (x = range.start; x <= range.end; x++) {
-                                    if (strstr(buffer + (x * SCREEN_WIDTH), searchstr) != NULL) {
-                                        printf("%d\t%s\n", x + 1, buffer + (x * SCREEN_WIDTH));
-                                    }
-                                }
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "lines out of range");
-                            }
+                            find_in_range(range.start, range.end, searchstr);
                         } else {
-                            if (line >= 0 && line < lines) {
-                                if (strstr(buffer + (line * SCREEN_WIDTH), searchstr) != NULL) { //match was found
-                                    printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
-                                }
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "line out of range");
+                            if (find_in_line(line, searchstr)) {
+                                printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
                             }
                         }
                         break;
