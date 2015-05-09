@@ -21,6 +21,8 @@ int file_exists = 0;
 char file_name[SCREEN_WIDTH];
 int isRange = 0;
 struct range range;
+char *copied = NULL; //Pointer to memory where copied sections of text are stored
+int copy_lines = 0; //How many lines are stored there
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -232,15 +234,10 @@ void delete_line(int line) {
 void delete_lines(int start, int end) {
     int i;
     
-    if (start + 1 <= lines && start + 1 <= lines && start + 1 >= 1 && start + 1 >= 1) {
-        for (i = start; i <= start; i++) {
+    if (start + 1 <= lines && end + 1 <= lines && start + 1 >= 1 && end + 1 >= 1) {
+        for (i = start; i <= end; i++) {
             delete_line(i);
         }
-    }
-    if (lines - (start - start) + 1 > 0) {
-        lines -= start - start + 1;
-    } else {
-        lines = 0;
     }
 }
 
@@ -458,6 +455,16 @@ void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char
     }
 }
 
+void select_all() {
+    if (lines > 0) {
+        isRange = 1;
+        range.start = 0;
+        range.end = lines - 1;
+    } else {
+        line = 0;
+    }
+}
+
 void set_surround() {
     isRange = 1;
     if (lines > SURROUND * 2) {
@@ -468,13 +475,38 @@ void set_surround() {
     }
 }
 
-void select_all() {
-    if (lines > 0) {
-        isRange = 1;
-        range.start = 0;
-        range.end = lines - 1;
+void copy_line(int line) {
+    char copy_line[SCREEN_WIDTH];
+    
+    strcpy(copy_line, buffer + (line * SCREEN_WIDTH)); //Copies one line at a time to copyLine
+    new_buffer = realloc(copied, copy_lines + 1 * SCREEN_WIDTH * sizeof(char));
+    if (new_buffer == NULL) {
+        printf("Error: out of memory\n");
+        exit(1);
+    }
+    copied = new_buffer;
+    strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
+    copy_lines++;
+}
+
+void copy_line_range(int start, int end) {
+    int i;
+    
+    for (i = start; i <= end; i++) {
+        copy_line(i);
+    }
+}
+
+void paste(int line) {
+    int i;
+    
+    if (copied == NULL) {
+        printf("?\n");
+        strcpy(error, "clipboard empty");
     } else {
-        line = 0;
+        for (i = 0; i < copy_lines; i++) {
+            insert_line(copied + i * SCREEN_WIDTH, line + 1 + i);
+        }
     }
 }
     
@@ -507,8 +539,6 @@ int main(int argc, char *argv[]) {
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char *replaceptr; //For use by the search & replace command
-    char *copied = NULL; //Pointer to memory where copied sections of text are stored
-    int copyLines = 0; //How many lines are stored there
     char copyLine[SCREEN_WIDTH];
     strcpy(error, "");
     FILE *fp;
@@ -739,117 +769,28 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'z':
                         free(copied);
-                        copyLines = 0;
+                        copy_lines = 0;
                         copied = NULL;
                         if (isRange == 1) {
-                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
-                                for (x = range.start; x <= range.end; x++) {
-                                    strcpy(copyLine, buffer + (x * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-                                    new_buffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
-                                    if (new_buffer == NULL) {
-                                        printf("Error: out of memory\n");
-                                        exit(1);
-                                    }
-                                    copied = new_buffer;
-                                    strcpy(copied + (copyLines * SCREEN_WIDTH), copyLine);
-                                    copyLines++;
-                                }
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "lines out of range");
-                            }
+                            copy_line_range(range.start, range.end);
                         } else {
-                            if (line >= 0 && line < lines) {
-                                new_buffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
-                                if (new_buffer == NULL) {
-                                    printf("Error: out of memory\n");
-                                    exit(1);
-                                }
-                                copied = new_buffer;
-                                strcpy(copied, buffer + (line * SCREEN_WIDTH));
-                                copyLines = 1;
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "line out of range");
-                            }
+                            copy_line(line);
                         }
                         break;
                     case 'x':
                         free(copied);
-                        copyLines = 0;
+                        copy_lines = 0;
                         copied = NULL;
                         if (isRange == 1) {
-                            if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
-                                for (x = range.start; x <= range.end; x++) {
-                                    strcpy(copyLine, buffer + (x * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-                                    new_buffer = realloc(copied, (copyLines + 1) * SCREEN_WIDTH * sizeof(char));
-                                    if (new_buffer == NULL) {
-                                        printf("Error: out of memory\n");
-                                        exit(1);
-                                    }
-                                    copied = new_buffer;
-                                    strcpy(copied + (copyLines * SCREEN_WIDTH), copyLine);
-                                    copyLines++;
-                                }
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "lines out of range");
-                            }
+                            copy_line_range(range.start, range.end);
+                            delete_lines(range.start, range.end);
                         } else {
-                            if (line >= 0 && line < lines) {
-                                new_buffer = realloc(copied, SCREEN_WIDTH * sizeof(char));
-                                if (new_buffer == NULL) {
-                                    printf("Error: out of memory\n");
-                                    exit(1);
-                                }
-                                copied = new_buffer;
-                                strcpy(copied, buffer + (line * SCREEN_WIDTH));
-                                copyLines = 1;
-                            } else {
-                                printf("?\n");
-                                strcpy(error, "line out of range");
-                            }
+                            copy_line(line);
+                            delete_line(line);
                         }
-                        
-                        /* Copy into buffer above
-                         * Delete lines below (cut from delete command)
-                         */
-                         
-                        if (isRange == 1) {
-                            isRange = 0;
-                            if (range.start + 1 <= lines && range.end + 1 <= lines && range.start + 1 >= 1 && range.end + 1 >= 1) {
-                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end + 1) * SCREEN_WIDTH), ((range.end - range.start) + 1) * SCREEN_WIDTH * sizeof(char)); //Plus one since this is an inclusive delete
-                            }
-                            lines -= range.end - range.start + 1;
-                        } else {
-                            if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-                                memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
-                            }
-                            lines--; //Removes the upper lines
-                        }
-                        new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
-                        if (new_buffer == NULL) {
-                            fprintf(stderr, "Error cutting line");
-                            free(buffer);
-                            exit(2);
-                        }
-                        buffer = new_buffer;
-                        unsaved = 1;
                         break;
                     case 'v':
-                        lines += copyLines; //Adds the newly copied lines
-                        new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
-                        if (new_buffer == NULL) {
-                            fprintf(stderr, "Error: out of memory");
-                            free(buffer);
-                            exit(2);
-                        }
-                        buffer = new_buffer;
-                        memmove(buffer + ((line + copyLines) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - copyLines) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
-                        for (x = 0; x < copyLines; x++) {
-                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), copied + (x * SCREEN_WIDTH));
-                        }
-                        unsaved = 1;
+                        paste(line);
                         break;
                     case '\t':
                         break;
