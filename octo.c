@@ -11,6 +11,11 @@
 #define SURROUND 10
 /* The number of lines in each direction the surround command prints out */
 
+int lines = 0; //Total amount of lines, not shifted
+char error[SCREEN_WIDTH];
+char *buffer = NULL;
+char *newBuffer = NULL;
+
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
  */
@@ -61,6 +66,29 @@ void printUsage(char *programName) {
     printf(" -v: Displays version\n");
 }
 
+void print_numbered_line(int line) {
+    char lineContents[SCREEN_WIDTH];
+    if (line + 1 > lines || line + 1 < 1) {
+        strcpy(error, "line entered is outside limits");
+        printf("?\n");
+    } else {
+        strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
+        printf("%d\t%s\n", line + 1, lineContents);
+    }
+}
+
+void print_numbered_lines(int start, int end) {
+    int i;
+    if (start + 1 > lines || end + 1 > lines || start < 0 || end < 0) {
+        strcpy(error, "range outside limits");
+        printf("?\n");
+    } else {
+        for (i = start; i <= end; i++) {
+            print_numbered_line(i);
+        }
+    }
+}
+
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
  */
@@ -73,14 +101,11 @@ int main(int argc, char *argv[]) {
     char commandStr[MAX_COMMAND_SIZE];
     int i;
     int linesInputted;
-    int line = 0; //Shifted by one (0 - line 1, 1 - line 2 ...)
-    int lines = 0; //Total amount of lines, not shifted
-    char lineContents[SCREEN_WIDTH];
-    struct number parsedNumber;
-    char *buffer = NULL;
     int isRange = 0;
     struct range range;
-    char *newBuffer = NULL;
+    int line = 0; //Shifted by one (0 - line 1, 1 - line 2 ...)
+    char lineContents[SCREEN_WIDTH];
+    struct number parsedNumber;
     int newLines = 0;
     int c;
     int x;
@@ -95,7 +120,6 @@ int main(int argc, char *argv[]) {
     int inputSize = 0;
     int fileLines = 0;
     int fileChars = 0;
-    char error[SCREEN_WIDTH];
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char *replaceptr; //For use by the search & replace command
@@ -237,22 +261,9 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'n':
                         if (isRange == 1) {
-                            if (range.start + 1 > lines || range.end + 1 > lines || range.start < 0 || range.end < 0) {
-                                strcpy(error, "range outside limits");
-                                printf("?\n");
-                            } else {
-                                for (x = range.start; x <= range.end; x++) {
-                                    printf("%d\t%s\n", x + 1, buffer + (x * SCREEN_WIDTH));
-                                }
-                            }
+                            print_numbered_lines(range.start, range.end);
                         } else {
-                            if (line + 1 > lines || line + 1 < 1) {
-                                strcpy(error, "line entered is outside limits");
-                                printf("?\n");
-                            } else {
-                                strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
-                                printf("%d\t%s\n", line + 1, lineContents);
-                            }
+                            print_numbered_line(line);
                         }
                         break;
                     case 'e':
