@@ -350,6 +350,20 @@ void open_file() {
         }
     }
 }
+
+void transpose_next(int line) {
+    char templine[SCREEN_WIDTH];
+    
+    if (line + 2 <= lines && line + 1 > 0) {
+        strcpy(templine, buffer + ((line + 1) * SCREEN_WIDTH));
+        strcpy(buffer + ((line + 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
+        strcpy(buffer + (line * SCREEN_WIDTH), templine);
+    } else {
+        strcpy(error, "can't transpose last line");
+        printf("?\n");
+    }
+    unsaved = 1;
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -569,15 +583,7 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 't':
-                        if (line + 2 <= lines && line + 1 > 0) {
-                            strcpy(templine, buffer + ((line + 1) * SCREEN_WIDTH));
-                            strcpy(buffer + ((line + 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
-                            strcpy(buffer + (line * SCREEN_WIDTH), templine);
-                        } else {
-                            strcpy(error, "can't transpose last line");
-                            printf("?\n");
-                        }
-                        unsaved = 1;
+                        transpose_next(line);
                         break;
                     case 'T':
                         if (line + 1 <= lines && line + 1 >= 1) {
