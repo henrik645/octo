@@ -223,15 +223,17 @@ void insert_lines(int current_line) {
 }
 
 void delete_line(int line) {
-    if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-        memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
+    if (line >= 1 && line <= lines) {
+        if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
+            memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
+        }
+        if (lines > 0) {
+            lines--; //Removes the upper lines
+        } else {
+            lines = 0;
+        }
+        unsaved = 1;
     }
-    if (lines > 0) {
-        lines--; //Removes the upper lines
-    } else {
-        lines = 0;
-    }
-    unsaved = 1;
 }
 
 void delete_lines(int start, int end) {
@@ -402,12 +404,14 @@ int find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
     return 0;
 }
 
-void find_in_range(int start, int stop, char searchstr[SCREEN_WIDTH]) {
+void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
     int i = 0;
-
-    for (i = start; i <= stop; i++) {
-        if (find_in_line(i, searchstr)) {
-            printf("%d\t%s\n", i + 1, buffer + (i * SCREEN_WIDTH));
+    
+    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && start + 1 <= end) {
+        for (i = start; i <= end; i++) {
+            if (find_in_line(i, searchstr)) {
+                printf("%d\t%s\n", i + 1, buffer + (i * SCREEN_WIDTH));
+            }
         }
     }
 }
@@ -421,7 +425,7 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
     int to;
     int from;
     
-    if (line >= 0 && line < lines) {
+    if (line >= 0 && line + 1 <= lines) {
         while (1) {
             if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) {
                 extralength = strlen(replacestr) - strlen(searchstr);
@@ -495,7 +499,7 @@ void copy_line(int line) {
 void copy_line_range(int start, int end) {
     int i;
     
-    if (start >= 1 && start <= lines && end >= 1 && end <= lines) {
+    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && end + 1 <= lines) {
         for (i = start; i <= end; i++) {
             copy_line(i);
         }
@@ -508,12 +512,14 @@ void copy_line_range(int start, int end) {
 void paste(int line) {
     int i;
     
-    if (copied == NULL) {
-        printf("?\n");
-        strcpy(error, "clipboard empty");
-    } else {
-        for (i = 0; i < copy_lines; i++) {
-            insert_line(copied + i * SCREEN_WIDTH, line + 1 + i);
+    if (line + 1 >= 1 && line + 1 <= lines) {
+        if (copied == NULL) {
+            printf("?\n");
+            strcpy(error, "clipboard empty");
+        } else {
+            for (i = 0; i < copy_lines; i++) {
+                insert_line(copied + i * SCREEN_WIDTH, line + 1 + i);
+            }
         }
     }
 }
