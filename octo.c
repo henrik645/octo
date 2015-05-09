@@ -12,12 +12,15 @@
 /* The number of lines in each direction the surround command prints out */
 
 int lines = 0; //Total amount of lines, not shifted
+int line = 0; //Shifted by one (0 - line 1, 1 - line 2 ...)
 char error[SCREEN_WIDTH];
 char *buffer = NULL;
 char *new_buffer = NULL;
 int unsaved = 0; //Set to 1 when there are unsaved changes
 int file_exists = 0;
 char file_name[SCREEN_WIDTH];
+int isRange = 0;
+struct range range;
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -455,6 +458,16 @@ void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char
     }
 }
 
+void set_surround() {
+    isRange = 1;
+    if (lines > SURROUND * 2) {
+        range.start = line - SURROUND;
+        range.end = line + SURROUND;
+    } else {
+        select_all();
+    }
+}
+
 void select_all() {
     if (lines > 0) {
         isRange = 1;
@@ -477,9 +490,6 @@ int main(int argc, char *argv[]) {
     char command_str[MAX_COMMAND_SIZE];
     int i;
     int linesInputted;
-    int isRange = 0;
-    struct range range;
-    int line = 0; //Shifted by one (0 - line 1, 1 - line 2 ...)
     char lineContents[SCREEN_WIDTH];
     struct number parsedNumber;
     int newLines = 0;
@@ -725,14 +735,7 @@ int main(int argc, char *argv[]) {
                         unsaved = 0;
                         break;
                     case '&':
-                        isRange = 1;
-                        if (lines > SURROUND * 2) {
-                            range.start = line - SURROUND;
-                            range.end = line + SURROUND;
-                        } else {
-                            range.start = 0;
-                            range.end = lines - 1;
-                        }
+                        set_surround();
                         break;
                     case 'z':
                         free(copied);
