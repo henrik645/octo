@@ -624,6 +624,7 @@ int main(int argc, char *argv[]) {
                         if (isRange == 1) {
                             if (range.start >= 0 && range.start < lines && range.end >= 0 && range.end < lines) {
                                 for (x = range.start; x <= range.end; x++) {
+                                    lineoffset = 0;
                                     while (1) {
                                         if ((replaceptr = strstr(buffer + (x * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) { //match was found
                                             extralength = strlen(replacestr) - strlen(searchstr);
