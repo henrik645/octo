@@ -523,24 +523,208 @@ void paste(int line) {
         }
     }
 }
-    
+
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
  */
-int main(int argc, char *argv[]) {
-    char option;
-    char cmdopts[] = "p:hv";
-    opterr = 0;
-    
+
+void parse_commands(char *command_str) {
     int i;
-    int file_chars = 0;
-    char prompt = ':';
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char command;
-    char command_str[MAX_COMMAND_SIZE];
     struct number parsedNumber;
+    
+    for (i = 0; i < strlen(command_str);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
+        command = command_str[i];
+        parsedNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
+        if (parsedNumber.value >= 0) { //Input is number
+            i = parsedNumber.size; //parsedNumber.size was already initialized to i beforehand
+            if (command_str[i] == ',') {
+                i++; //Removes the ','
+                struct number endNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
+                i = endNumber.size; //endNumber.size was already initialized to i beforehand
+                if (endNumber.value >= 0) {
+                    if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines) {
+                        isRange = 1;
+                        range.start = parsedNumber.value - 1;
+                        range.end = endNumber.value - 1;
+                    } else {
+                        printf("?\n");
+                        strcpy(error, "range limits out of range");
+                    }
+                } else {
+                    strcpy(error, "wrongly formatted range");
+                    printf("?\n");
+                    break;
+                }
+            } else {
+                isRange = 0;
+            }
+            line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
+        } else {
+            if (line + 1 > lines || line + 1 < 1) {
+                if (lines == 0) {
+                    line = lines;
+                } else {
+                    line = lines - 1;
+                }
+            }
+            switch (command) {
+                case 'q':
+                    quit_program();
+                    break;
+                case 'n':
+                    if (isRange == 1) {
+                        print_numbered_lines(range.start, range.end);
+                    } else {
+                        print_numbered_line(line);
+                    }
+                    break;
+                case 'e':
+                    print_current_line(line);
+                    break;
+                case 'c':
+                    change_line(line);
+                    break;
+                case 'p':
+                    if (isRange) {
+                        print_lines(range.start, range.end);
+                    } else {
+                        print_line(line);
+                    }
+                    break;
+                case 'i':
+                    insert_lines(line);
+                    break;
+                case 'd':
+                    if (isRange == 1) {
+                        delete_lines(range.start, range.end);
+                    } else {
+                        delete_line(line);
+                    }
+                    break;
+                case 'a':
+                    if (lines == 0) {
+                        insert_lines(line);
+                    } else {
+                        insert_lines(line + 1);
+                    }
+                    break;
+                case 'w':
+                    if (write_file() != 0) {
+                        strcpy(command_str, ""); //Prevents octo from executing any quit commands as an error occured and the file isn't saved.
+                    }
+                    break;
+                case 'W':
+                    file_exists = 0;
+                    if (write_file() != 0) {
+                        strcpy(command_str, "");
+                    }
+                    break;
+                case 'o':
+                    if (unsaved == 0) {
+                        open_file_prompt();
+                    } else {
+                        printf("!\n");
+                        strcpy(error, "unsaved changes");
+                    }
+                    break;
+                case 't':
+                    transpose_next(line);
+                    break;
+                case 'T':
+                    transpose_previous(line);
+                    break;
+                case 'h':
+                    print_help();
+                    break;
+                case 'f':
+                    printf("Search: ");
+                    fgets(searchstr, SCREEN_WIDTH, stdin);
+                    strtok(searchstr, "\n"); //Removes trailing newline
+                    if (isRange == 1) {
+                        find_in_range(range.start, range.end, searchstr);
+                    } else {
+                        if (find_in_line(line, searchstr)) {
+                            printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
+                        }
+                    }
+                    break;
+                case 's':
+                    printf("Search: ");
+                    fgets(searchstr, SCREEN_WIDTH, stdin);
+                    strtok(searchstr, "\n");
+                    printf("Replace: ");
+                    fgets(replacestr, SCREEN_WIDTH, stdin);
+                    strtok(replacestr, "\n");
+
+                    if (isRange == 1) {
+                        search_replace_range(range.start, range.end, searchstr, replacestr);
+                    } else {
+                        search_replace(line, searchstr, replacestr);
+                    }
+                    unsaved = 1;
+                    break;
+                case '@':
+                    select_all();
+                    break;
+                case '!':
+                    unsaved = 0;
+                    break;
+                case '&':
+                    set_surround();
+                    break;
+                case 'z':
+                    free(copied);
+                    copy_lines = 0;
+                    copied = NULL;
+                    if (isRange == 1) {
+                        copy_line_range(range.start, range.end);
+                    } else {
+                        copy_line(line);
+                    }
+                    break;
+                case 'x':
+                    free(copied);
+                    copy_lines = 0;
+                    copied = NULL;
+                    if (isRange == 1) {
+                        copy_line_range(range.start, range.end);
+                        delete_lines(range.start, range.end);
+                    } else {
+                        copy_line(line);
+                        delete_line(line);
+                    }
+                    break;
+                case 'v':
+                    paste(line);
+                    break;
+                case '\t':
+                    break;
+                case ' ':
+                    break;
+                case '\n':
+                    break;
+                default:
+                    printf("?\n");
+                    strcpy(command_str, ""); //Empties command_str, accepting no more commands after an error
+                    strcpy(error, "unknown command");
+                    break;
+            }
+            i++;
+        }
+    }
+}
+    
+int main(int argc, char *argv[]) {
+    int file_chars = 0;
+    char prompt = ':';
+    char option;
+    char cmdopts[] = "p:hv";
+    char command_str[MAX_COMMAND_SIZE];
     FILE *fp;
+    opterr = 0;
     
     strcpy(error, "");
     
@@ -600,186 +784,7 @@ int main(int argc, char *argv[]) {
         printf("%c", prompt);
         fgets(command_str, MAX_COMMAND_SIZE, stdin);
         strtok(command_str, "\n"); //Strips the newline away
-        for (i = 0; i < strlen(command_str);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
-            command = command_str[i];
-            parsedNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
-            if (parsedNumber.value >= 0) { //Input is number
-                i = parsedNumber.size; //parsedNumber.size was already initialized to i beforehand
-                if (command_str[i] == ',') {
-                    i++; //Removes the ','
-                    struct number endNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
-                    i = endNumber.size; //endNumber.size was already initialized to i beforehand
-                    if (endNumber.value >= 0) {
-                        if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines) {
-                            isRange = 1;
-                            range.start = parsedNumber.value - 1;
-                            range.end = endNumber.value - 1;
-                        } else {
-                            printf("?\n");
-                            strcpy(error, "range limits out of range");
-                        }
-                    } else {
-                        strcpy(error, "wrongly formatted range");
-                        printf("?\n");
-                        break;
-                    }
-                } else {
-                    isRange = 0;
-                }
-                line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
-            } else {
-                if (line + 1 > lines || line + 1 < 1) {
-                    if (lines == 0) {
-                        line = lines;
-                    } else {
-                        line = lines - 1;
-                    }
-                }
-                switch (command) {
-                    case 'q':
-                        quit_program();
-                        break;
-                    case 'n':
-                        if (isRange == 1) {
-                            print_numbered_lines(range.start, range.end);
-                        } else {
-                            print_numbered_line(line);
-                        }
-                        break;
-                    case 'e':
-                        print_current_line(line);
-                        break;
-                    case 'c':
-                        change_line(line);
-                        break;
-                    case 'p':
-                        if (isRange) {
-                            print_lines(range.start, range.end);
-                        } else {
-                            print_line(line);
-                        }
-                        break;
-                    case 'i':
-                        insert_lines(line);
-                        break;
-                    case 'd':
-                        if (isRange == 1) {
-                            delete_lines(range.start, range.end);
-                        } else {
-                            delete_line(line);
-                        }
-                        break;
-                    case 'a':
-                        if (lines == 0) {
-                            insert_lines(line);
-                        } else {
-                            insert_lines(line + 1);
-                        }
-                        break;
-                    case 'w':
-                        if (write_file() != 0) {
-                            strcpy(command_str, ""); //Prevents octo from executing any quit commands as an error occured and the file isn't saved.
-                        }
-                        break;
-                    case 'W':
-                        file_exists = 0;
-                        if (write_file() != 0) {
-                            strcpy(command_str, "");
-                        }
-                        break;
-                    case 'o':
-                        if (unsaved == 0) {
-                            open_file_prompt();
-                        } else {
-                            printf("!\n");
-                            strcpy(error, "unsaved changes");
-                        }
-                        break;
-                    case 't':
-                        transpose_next(line);
-                        break;
-                    case 'T':
-                        transpose_previous(line);
-                        break;
-                    case 'h':
-                        print_help();
-                        break;
-                    case 'f':
-                        printf("Search: ");
-                        fgets(searchstr, SCREEN_WIDTH, stdin);
-                        strtok(searchstr, "\n"); //Removes trailing newline
-                        if (isRange == 1) {
-                            find_in_range(range.start, range.end, searchstr);
-                        } else {
-                            if (find_in_line(line, searchstr)) {
-                                printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
-                            }
-                        }
-                        break;
-                    case 's':
-                        printf("Search: ");
-                        fgets(searchstr, SCREEN_WIDTH, stdin);
-                        strtok(searchstr, "\n");
-                        printf("Replace: ");
-                        fgets(replacestr, SCREEN_WIDTH, stdin);
-                        strtok(replacestr, "\n");
-
-                        if (isRange == 1) {
-                            search_replace_range(range.start, range.end, searchstr, replacestr);
-                        } else {
-                            search_replace(line, searchstr, replacestr);
-                        }
-                        unsaved = 1;
-                        break;
-                    case '@':
-                        select_all();
-                        break;
-                    case '!':
-                        unsaved = 0;
-                        break;
-                    case '&':
-                        set_surround();
-                        break;
-                    case 'z':
-                        free(copied);
-                        copy_lines = 0;
-                        copied = NULL;
-                        if (isRange == 1) {
-                            copy_line_range(range.start, range.end);
-                        } else {
-                            copy_line(line);
-                        }
-                        break;
-                    case 'x':
-                        free(copied);
-                        copy_lines = 0;
-                        copied = NULL;
-                        if (isRange == 1) {
-                            copy_line_range(range.start, range.end);
-                            delete_lines(range.start, range.end);
-                        } else {
-                            copy_line(line);
-                            delete_line(line);
-                        }
-                        break;
-                    case 'v':
-                        paste(line);
-                        break;
-                    case '\t':
-                        break;
-                    case ' ':
-                        break;
-                    case '\n':
-                        break;
-                    default:
-                        printf("?\n");
-                        strcpy(command_str, ""); //Empties command_str, accepting no more commands after an error
-                        strcpy(error, "unknown command");
-                        break;
-                }
-                i++;
-            }
-        }
+        parse_commands(command_str);
     }
     return 1;
 }
