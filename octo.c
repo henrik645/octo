@@ -364,6 +364,19 @@ void transpose_next(int line) {
     }
     unsaved = 1;
 }
+
+void transpose_previous(int line) {
+    char templine[SCREEN_WIDTH];
+    
+    if (line + 1 <= lines && line + 1 >= 1) {
+        strcpy(templine, buffer + ((line - 1) * SCREEN_WIDTH));
+        strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
+        strcpy(buffer + (line * SCREEN_WIDTH), templine);
+    } else {
+        strcpy(error, "can't transpose first line");
+        printf("?\n");
+    }
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -586,14 +599,7 @@ int main(int argc, char *argv[]) {
                         transpose_next(line);
                         break;
                     case 'T':
-                        if (line + 1 <= lines && line + 1 >= 1) {
-                            strcpy(templine, buffer + ((line - 1) * SCREEN_WIDTH));
-                            strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
-                            strcpy(buffer + (line * SCREEN_WIDTH), templine);
-                        } else {
-                            strcpy(error, "can't transpose first line");
-                            printf("?\n");
-                        }
+                        transpose_previous(line);
                         break;
                     case 'h':
                         if (error[0] == '\0') {
