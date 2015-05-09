@@ -122,12 +122,12 @@ int main(int argc, char *argv[]) {
                 printUsage(argv[0]);
                 return 0;
                 break;
-	    case 'v':
-		printf("See http://github.com/henrik645/octo for more details.\n\n");
-		printf("Copyright 2015.\n");
-		printf("Licensed by the MIT License.\n");
-		return 0;
-		break;
+            case 'v':
+                printf("See http://github.com/henrik645/octo for more details.\n\n");
+                printf("Copyright 2015.\n");
+                printf("Licensed by the MIT License.\n");
+                return 0;
+                break;
             case '?':
                 if (optopt == 'p') {
                     fprintf(stderr, "Error: 'p' requires an argument.\n");
