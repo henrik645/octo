@@ -66,12 +66,13 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
     }
 }
 
-void printUsage(char *programName) {
+void print_usage(char *programName) {
     printf("Usage: %s [options] [file_name]\n\n", programName);
     printf("Options:\n");
     printf(" -h: Displays help\n");
     printf(" -p: Sets prompt\n");
     printf(" -v: Displays version\n");
+    printf(" -e: Sets command string\n");
 }
 
 void *update_buffer(void *buf, size_t size) {
@@ -743,7 +744,7 @@ int main(int argc, char *argv[]) {
                 prompt = optarg[0];
                 break;
             case 'h':
-                printUsage(argv[0]);
+                print_usage(argv[0]);
                 return 0;
                 break;
             case 'v':
@@ -781,7 +782,7 @@ int main(int argc, char *argv[]) {
     }
     
     if (argc - optind > 1) { //Too many arguments
-        printUsage(argv[0]);
+        print_usage(argv[0]);
         exit(1);
     } else if (optind + 1 == argc) {
         file_exists = 1;
