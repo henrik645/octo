@@ -432,58 +432,7 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'a':
-                        if (lines > 0) {
-                            line++; //Makes everything operate on the second line
-                        }
-                        if (line + 1 > lines) {
-                            lines = line;
-                        }
-                        linesInputted = 0;
-                        inputSize = 0;
-                        while (1) { //Clears newline from stdin
-                            c = getchar();
-                            if (c != '\n') {
-                                ungetc(c, stdin); //Puts the character back
-                                break;
-                            }
-                        }
-                        while (1) {
-                            fgets(inputLine, SCREEN_WIDTH, stdin);
-                            if (strcmp(inputLine, ".\n") == 0) {
-                                break;
-                            }
-                            if (strcmp(inputLine, "\n") == 0) {
-                                inputLine[0] = '\0';
-                            } else {
-                                strtok(inputLine, "\n");
-                            }
-                            if (linesInputted + 1 > inputSize) {
-                                inputSize = linesInputted + 1;
-                                newInput = realloc(input, inputSize * SCREEN_WIDTH * sizeof(char));
-                                if (newInput == NULL) {
-                                    printf("Error: out of memory\n");
-                                    exit(1);
-                                }
-                                input = newInput;
-                            }
-                            strcpy(input + (linesInputted * SCREEN_WIDTH * sizeof(char)), inputLine);
-                            linesInputted++;
-                        }
-                        lines += linesInputted; //Adds to the buffer
-                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Adds to the buffer
-                        if (newBuffer == NULL) {
-                            fprintf(stderr, "Error: out of memory");
-                            free(buffer);
-                            exit(2);
-                        }
-                        buffer = newBuffer;
-                        memmove(buffer + ((line + linesInputted) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH), (lines - line - linesInputted) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
-                        for (x = 0; x < linesInputted; x++) {
-                            strcpy(buffer + ((line + x) * SCREEN_WIDTH), input + (x * SCREEN_WIDTH * sizeof(char)));
-                        }
-                        free(input);
-                        input = NULL;
-                        unsaved = 1;
+                        insert_lines(line + 1);
                         break;
                     case 'w':
                         fileChars = 0;
