@@ -15,6 +15,7 @@ int lines = 0; //Total amount of lines, not shifted
 char error[SCREEN_WIDTH];
 char *buffer = NULL;
 char *newBuffer = NULL;
+int unsaved = 0; //Set to 1 when there are unsaved changes
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -89,6 +90,16 @@ void print_numbered_lines(int start, int end) {
     }
 }
 
+void quit_program(void) {
+    if (unsaved == 0) {
+        free(buffer); //Frees the text buffer
+        exit(0); //Exits the program
+    } else {
+        printf("!\n");
+        strcpy(error, "unsaved changes");
+    }
+}
+
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
  */
@@ -123,7 +134,6 @@ int main(int argc, char *argv[]) {
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char *replaceptr; //For use by the search & replace command
-    int unsaved = 0; //Set to 1 when there are unsaved changes
     char *copied = NULL; //Pointer to memory where copied sections of text are stored
     int copyLines = 0; //How many lines are stored there
     char copyLine[SCREEN_WIDTH];
@@ -251,13 +261,7 @@ int main(int argc, char *argv[]) {
                 }
                 switch (command) {
                     case 'q':
-                        if (unsaved == 0) {
-                            free(buffer); //Frees the text buffer
-                            exit(0); //Exits the program
-                        } else {
-                            printf("!\n");
-                            strcpy(error, "unsaved changes");
-                        }
+                        quit_program();
                         break;
                     case 'n':
                         if (isRange == 1) {
