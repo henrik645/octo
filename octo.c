@@ -201,6 +201,32 @@ void insert_lines(int current_line) {
         insert_line(inputLine, current_line);
     }
 }
+
+void delete_line(int line) {
+    if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
+        memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
+    }
+    if (lines > 0) {
+        lines--; //Removes the upper lines
+    } else {
+        lines = 0;
+    }
+}
+
+void delete_lines(int start, int end) {
+    int i;
+    
+    if (start + 1 <= lines && start + 1 <= lines && start + 1 >= 1 && start + 1 >= 1) {
+        for (i = start; i <= start; i++) {
+            delete_line(i);
+        }
+    }
+    if (lines - (start - start) + 1 > 0) {
+        lines -= start - start + 1;
+    } else {
+        lines = 0;
+    }
+}
     
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
@@ -435,24 +461,9 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'd':
                         if (isRange == 1) {
-                            isRange = 0;
-                            if (range.start + 1 <= lines && range.end + 1 <= lines && range.start + 1 >= 1 && range.end + 1 >= 1) {
-                                memmove(buffer + (range.start * SCREEN_WIDTH), buffer + ((range.end + 1) * SCREEN_WIDTH), ((range.end - range.start) + 1) * SCREEN_WIDTH * sizeof(char)); //Plus one since this is an inclusive delete
-                            }
-                            if (lines - (range.end - range.start) + 1 > 0) {
-                                lines -= range.end - range.start + 1;
-                            } else {
-                                lines = 0;
-                            }
+                            delete_lines(range.start, range.end);
                         } else {
-                            if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
-                                memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
-                            }
-                            if (lines > 0) {
-                                lines--; //Removes the upper lines
-                            } else {
-                                lines = 0;
-                            }
+                            delete_line(line);
                         }
                         newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
                         if (newBuffer == NULL) {
