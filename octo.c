@@ -479,7 +479,11 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'a':
-                        insert_lines(line + 1);
+                        if (lines == 0) {
+                            insert_lines(line);
+                        } else {
+                            insert_lines(line + 1);
+                        }
                         break;
                     case 'w':
                         if (write_file() != 0) {
