@@ -108,6 +108,32 @@ void print_lines(int line) {
     }
 }
 
+void change_line(int line) {
+    char lineContents[SCREEN_WIDTH];
+    int i;
+    
+    if (line + 1 > lines) {
+        lines = line + 1;
+        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
+        if (newBuffer == NULL) {
+            fprintf(stderr, "Error: out of memory");
+            free(buffer);
+            exit(2);
+        }
+        buffer = newBuffer;
+    }
+    fgets(lineContents, SCREEN_WIDTH, stdin);
+    if (strcmp(lineContents, "\n") == 0) {
+        strcpy(lineContents, "");
+    }
+    strtok(lineContents, "\n"); //Removes the trailing newline
+    for (i = 0; i < SCREEN_WIDTH; i++) { //Clears the line
+        *(buffer + (line * SCREEN_WIDTH) + i) = 0;
+    }
+    strcpy(buffer + (line * SCREEN_WIDTH), lineContents);
+    unsaved = 1;
+}
+
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
  */
@@ -282,26 +308,7 @@ int main(int argc, char *argv[]) {
                         print_lines(line);
                         break;
                     case 'c':
-                        if (line + 1 > lines) {
-                            lines = line + 1;
-                            newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
-                            if (newBuffer == NULL) {
-                                fprintf(stderr, "Error: out of memory");
-                                free(buffer);
-                                exit(2);
-                            }
-                            buffer = newBuffer;
-                        }
-                        fgets(lineContents, SCREEN_WIDTH, stdin);
-                        if (strcmp(lineContents, "\n") == 0) {
-                            strcpy(lineContents, "");
-                        }
-                        strtok(lineContents, "\n"); //Removes the trailing newline
-                        for (x = 0; x < SCREEN_WIDTH; x++) { //Clears the line
-                            *(buffer + (line * SCREEN_WIDTH) + x) = 0;
-                        }
-                        strcpy(buffer + (line * SCREEN_WIDTH), lineContents);
-			unsaved = 1;
+                        change_line(line);
                         break;
                     case 'p':
                         if (isRange) {
