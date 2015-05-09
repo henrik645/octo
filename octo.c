@@ -246,7 +246,7 @@ void delete_lines(int start, int end) {
     }
 }
 
-int write_file_name(char file_name[SCREEN_WIDTH]) {
+int write_file_name(char file_name[SCREEN_WIDTH]) { //Returns -1 on error, the number of characters written otherwise
     int i = 0;
     int x = 0;
     int file_chars = 0;
@@ -255,7 +255,7 @@ int write_file_name(char file_name[SCREEN_WIDTH]) {
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL) {
         strcpy(error, "could not open file for writing");
-        return 1;
+        return -1;
     }
     
     fp = fopen(file_name, "w");
@@ -272,13 +272,15 @@ int write_file_name(char file_name[SCREEN_WIDTH]) {
         fputc('\n', fp); //Puts a newline after every line
     }
     fclose(fp);
-    printf("%d\n", file_chars);
     unsaved = 0;
+    file_exists = 1;
     
-    return 0;
+    return file_chars;
 }
 
-int write_file() {
+int write_file() { //Returns -1 on error, otherwise the amount of characters read
+    int file_chars;
+    
     if (file_exists) {
         return write_file_name(file_name);
     }
@@ -287,7 +289,14 @@ int write_file() {
     fgets(file_name, SCREEN_WIDTH, stdin);
     strtok(file_name, "\n"); //Removes the trailing newline
     
-    return write_file_name(file_name);
+    file_chars = write_file_name(file_name);
+    if (file_chars == -1) {
+        file_exists = 0;
+        fprintf(stderr, "file could not be written");
+        return -1;
+    }
+    
+    return file_chars;
 }
 
 int open_file(FILE *fp) {
@@ -392,26 +401,23 @@ void print_help() {
     }
 }
 
-int find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
+void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
     if (line >= 0 && line < lines) {
         if (strstr(buffer + (line * SCREEN_WIDTH), searchstr) != NULL) { //match was found
-            return 1;
+            printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
         }
     } else {
         printf("?\n");
         strcpy(error, "line out of range");
     }
-    return 0;
 }
 
 void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
     int i = 0;
     
-    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && start + 1 <= end) {
+    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && start + 1 <= lines) {
         for (i = start; i <= end; i++) {
-            if (find_in_line(i, searchstr)) {
-                printf("%d\t%s\n", i + 1, buffer + (i * SCREEN_WIDTH));
-            }
+            find_in_line(i, searchstr);
         }
     }
 }
@@ -530,6 +536,7 @@ void paste(int line) {
 
 void parse_commands(char *command_str) {
     int i;
+    int file_chars;
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char command;
@@ -612,8 +619,11 @@ void parse_commands(char *command_str) {
                     }
                     break;
                 case 'w':
-                    if (write_file() != 0) {
+                    file_chars = write_file();
+                    if (file_chars == -1) {
                         strcpy(command_str, ""); //Prevents octo from executing any quit commands as an error occured and the file isn't saved.
+                    } else {
+                        printf("%d\n", file_chars);
                     }
                     break;
                 case 'W':
@@ -646,9 +656,7 @@ void parse_commands(char *command_str) {
                     if (isRange == 1) {
                         find_in_range(range.start, range.end, searchstr);
                     } else {
-                        if (find_in_line(line, searchstr)) {
-                            printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
-                        }
+                        find_in_line(line, searchstr);
                     }
                     break;
                 case 's':
@@ -721,14 +729,13 @@ int main(int argc, char *argv[]) {
     int file_chars = 0;
     char prompt = ':';
     char option;
-    char cmdopts[] = "p:hv";
+    char cmdopts[] = "p:hve:";
     char command_str[MAX_COMMAND_SIZE];
+    int e_flag = 0;
     FILE *fp;
     opterr = 0;
     
     strcpy(error, "");
-    
-    printf("octo v%s\n", VERSION);
     
     while ((option = getopt(argc, argv, cmdopts)) != -1) {
         switch (option) {
@@ -745,9 +752,16 @@ int main(int argc, char *argv[]) {
                 printf("Licensed by the MIT License.\n");
                 return 0;
                 break;
+            case 'e':
+                strcpy(command_str, optarg);
+                e_flag = 1;
+                break;
             case '?':
                 if (optopt == 'p') {
                     fprintf(stderr, "Error: 'p' requires an argument.\n");
+                    return 1;
+                } else if (optopt == 'e') {
+                    fprintf(stderr, "Error: 'e' requires an argument.\n");
                     return 1;
                 } else if (isprint(optopt)) {
                     fprintf(stderr, "Error: Unknown option -%c\n", optopt);
@@ -762,6 +776,10 @@ int main(int argc, char *argv[]) {
         }
     }
     
+    if (!e_flag) {
+        printf("octo v%s\n", VERSION);
+    }
+    
     if (argc - optind > 1) { //Too many arguments
         printUsage(argv[0]);
         exit(1);
@@ -773,18 +791,30 @@ int main(int argc, char *argv[]) {
             printf(NEW_FILE);
         } else {
             file_chars = open_file(fp);
-            printf("%d\n", file_chars);
+            if (!e_flag) {
+                printf("%d\n", file_chars);
+            }
         }
     } else {
+        if (e_flag) {
+            printf("'e' option requires a file to work on\n");
+            return 1;
+        }
         file_exists = 0;
         printf(NEW_FILE);
     }
     
     while(1) {
-        printf("%c", prompt);
-        fgets(command_str, MAX_COMMAND_SIZE, stdin);
-        strtok(command_str, "\n"); //Strips the newline away
-        parse_commands(command_str);
+        if (!e_flag) {
+            printf("%c", prompt);
+            fgets(command_str, MAX_COMMAND_SIZE, stdin);
+            strtok(command_str, "\n"); //Strips the newline away
+            parse_commands(command_str);
+        } else {
+            parse_commands(command_str);
+            write_file_name(file_name);
+            quit_program();
+        }
     }
     return 1;
 }
