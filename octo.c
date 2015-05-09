@@ -100,6 +100,14 @@ void quit_program(void) {
     }
 }
 
+void print_lines(int line) {
+    if (lines > 0) {
+        printf("%d/%d\n", line + 1, lines);
+    } else {
+        printf("%d/%d\n", line, lines);
+    }
+}
+
 /* Parses a command and performs an action. Returns 1 when encountered with an error
  * Returns 0 when a quit command is reached
  */
@@ -271,11 +279,7 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'e':
-                        if (lines > 0) {
-                            printf("%d/%d\n", line + 1, lines);
-                        } else {
-                            printf("%d/%d\n", line, lines);
-                        }
+                        print_lines(line);
                         break;
                     case 'c':
                         if (line + 1 > lines) {
