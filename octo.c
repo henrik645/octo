@@ -8,6 +8,7 @@
 #define SCREEN_WIDTH 80
 #define VERSION "0.3"
 #define NEW_FILE "new file\n"
+#define SURROUND 10 //The number of lines in each direction the surround command prints out
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -650,6 +651,16 @@ int main(int argc, char *argv[]) {
                         break;
                     case '!':
                         unsaved = 0;
+                        break;
+                    case '&':
+                        isRange = 1;
+                        if (lines > SURROUND * 2) {
+                            range.start = line - SURROUND;
+                            range.end = line + SURROUND;
+                        } else {
+                            range.start = 0;
+                            range.end = lines - 1;
+                        }
                         break;
                     case 'z':
                         free(copied);
