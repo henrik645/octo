@@ -717,28 +717,19 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 's':
-                        if ((isRange && range.start >= 1 && range.start <= lines && range.end >= 1 && range.end <= lines) || (!isRange && line >= 1 && line <= lines)) {
-                            printf("Search: ");
-                            fgets(searchstr, SCREEN_WIDTH, stdin);
-                            strtok(searchstr, "\n");
-                            printf("Replace: ");
-                            fgets(replacestr, SCREEN_WIDTH, stdin);
-                            strtok(replacestr, "\n");
+                        printf("Search: ");
+                        fgets(searchstr, SCREEN_WIDTH, stdin);
+                        strtok(searchstr, "\n");
+                        printf("Replace: ");
+                        fgets(replacestr, SCREEN_WIDTH, stdin);
+                        strtok(replacestr, "\n");
 
-                            if (isRange == 1) {
-                                search_replace_range(range.start, range.end, searchstr, replacestr);
-                            } else {
-                                search_replace(line, searchstr, replacestr);
-                            }
-                            unsaved = 1;
+                        if (isRange == 1) {
+                            search_replace_range(range.start, range.end, searchstr, replacestr);
                         } else {
-                            printf("?\n");
-                            if (isRange) {
-                                strcpy(error, "lines out of range");
-                            } else {
-                                strcpy(error, "line out of range");
-                            }
+                            search_replace(line, searchstr, replacestr);
                         }
+                        unsaved = 1;
                         break;
                     case '@':
                         select_all();
