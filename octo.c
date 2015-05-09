@@ -100,7 +100,7 @@ void quit_program(void) {
     }
 }
 
-void print_lines(int line) {
+void print_current_line(int line) {
     if (lines > 0) {
         printf("%d/%d\n", line + 1, lines);
     } else {
@@ -132,6 +132,31 @@ void change_line(int line) {
     }
     strcpy(buffer + (line * SCREEN_WIDTH), lineContents);
     unsaved = 1;
+}
+
+void print_line(int line) {
+    char lineContents[SCREEN_WIDTH];
+    
+    if (line + 1 > lines || line + 1 < 1) {
+        strcpy(error, "line entered is outside limits");
+        printf("?\n");
+    } else {
+        strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
+        printf("%s\n", lineContents);
+    }
+}
+
+void print_lines(int start, int end) {
+    int i;
+    
+    if (start + 1 > lines || end + 1 > lines || start < 0 || end < 0) {
+        strcpy(error, "range outside limits");
+        printf("?\n");
+    } else {
+        for (i = start; i <= end; i++) {
+            print_line(i);
+        }
+    }
 }
 
 /* Parses a command and performs an action. Returns 1 when encountered with an error
@@ -305,30 +330,16 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'e':
-                        print_lines(line);
+                        print_current_line(line);
                         break;
                     case 'c':
                         change_line(line);
                         break;
                     case 'p':
                         if (isRange) {
-                            if (range.start + 1 > lines || range.end + 1 > lines || range.start < 0 || range.end < 0) {
-                                strcpy(error, "range outside limits");
-                                printf("?\n");
-                            } else {
-                                int x;
-                                for (x = range.start; x <= range.end; x++) {
-                                    printf("%s\n", buffer + (x * SCREEN_WIDTH));
-                                }
-                            }
+                            print_lines(range.start, range.end);
                         } else {
-                            if (line + 1 > lines || line + 1 < 1) {
-                                strcpy(error, "line entered is outside limits");
-                                printf("?\n");
-                            } else {
-                                strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
-                                printf("%s\n", lineContents);
-                            }
+                            print_line(line);
                         }
                         break;
                     case 'i':
