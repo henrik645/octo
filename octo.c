@@ -196,10 +196,8 @@ void insert_line(char line[SCREEN_WIDTH], int current_line) {
 
 void insert_lines(int current_line) {
     int lines_inputted = 0;
-    int input_size = 0;
     char input_line[SCREEN_WIDTH];
     char c;
-    char *newInput;
     
     while (1) { //Clears newline from stdin
         c = getchar();
@@ -279,8 +277,6 @@ int write_file_name(char file_name[SCREEN_WIDTH]) {
 }
 
 int write_file() {
-    int file_chars = 0;
-    
     if (file_exists) {
         return write_file_name(file_name);
     }
@@ -512,35 +508,21 @@ int main(int argc, char *argv[]) {
     char cmdopts[] = "p:hv";
     opterr = 0;
     
-    char command;
-    char command_str[MAX_COMMAND_SIZE];
     int i;
-    int linesInputted;
-    char lineContents[SCREEN_WIDTH];
-    struct number parsedNumber;
-    int newLines = 0;
     int c;
     int x;
     int z;
-    char prompt = ':';
-    char templine[SCREEN_WIDTH]; //Temporary files for use in the transpose command
-    char inputLine[SCREEN_WIDTH];
-    char *input = NULL;
-    char *newInput = NULL;
-    int inputSize = 0;
-    int fileLines = 0;
     int fileChars = 0;
+    int newLines = 0;
+    char prompt = ':';
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
-    char *replaceptr; //For use by the search & replace command
-    char copyLine[SCREEN_WIDTH];
-    strcpy(error, "");
+    char command;
+    char command_str[MAX_COMMAND_SIZE];
+    struct number parsedNumber;
     FILE *fp;
-    int extralength = 0; //Used by the search and replace function for moving memory on line
-    int bytes = 0;
-    int to = 0;
-    int from = 0;
-    int lineoffset = 0; //Stores the line offset when replacing with multiple instances in the same line
+    
+    strcpy(error, "");
     
     printf("octo v%s\n", VERSION);
     
