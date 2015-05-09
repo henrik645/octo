@@ -170,6 +170,15 @@ void insert_line(char line[SCREEN_WIDTH], int current_line) {
     buffer = newBuffer;
     memmove(buffer + ((current_line + 1) * SCREEN_WIDTH), buffer + (current_line * SCREEN_WIDTH), (lines - current_line - 1) * SCREEN_WIDTH * sizeof(char)); //Shifts the memory up x spaces (the number of lines entered)
     strcpy(buffer + current_line * SCREEN_WIDTH, line);
+    
+    newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
+    if (newBuffer == NULL) {
+        fprintf(stderr, "Error deleting line");
+        free(buffer);
+        exit(2);
+    }
+    buffer = newBuffer;
+    
     unsaved = 1;
 }
 
@@ -211,6 +220,7 @@ void delete_line(int line) {
     } else {
         lines = 0;
     }
+    unsaved = 1;
 }
 
 void delete_lines(int start, int end) {
@@ -465,14 +475,6 @@ int main(int argc, char *argv[]) {
                         } else {
                             delete_line(line);
                         }
-                        newBuffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
-                        if (newBuffer == NULL) {
-                            fprintf(stderr, "Error deleting line");
-                            free(buffer);
-                            exit(2);
-                        }
-                        buffer = newBuffer;
-                        unsaved = 1;
                         break;
                     case 'a':
                         if (lines > 0) {
