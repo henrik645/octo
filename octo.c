@@ -288,15 +288,57 @@ int write_file() {
     return write_file_name(file_name);
 }
 
-void open_file() {
+int open_file(FILE *fp) {
     int file_lines = 0;
     int file_chars = 0;
     int c; // int needed for proper handling of EOF
     int y = 0;
     int x = 0;
     int longest_line = 0;
+    
+    file_exists = 1;
+    while ((c = fgetc(fp)) != EOF) { //Counts the file sixe for sizing of the buffer
+        if (c == '\n') {
+            file_lines++;
+            if (file_chars > longest_line) {
+                longest_line = file_chars;
+            }
+        } else {
+            file_chars++;
+        }
+    }
+
+    file_chars = 0;
+    
+    if (longest_line > SCREEN_WIDTH) {
+        file_exists = 0;
+        strcpy(error, "file is wider than screen width");
+        printf("!\n");
+        return 0;
+    } else {
+        lines = file_lines;
+        buffer = update_buffer(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
+        rewind(fp); //Rewinds the file for reading actual file contents
+        
+        while ((c = fgetc(fp)) != EOF) {
+            if (c == '\n') {
+                x = 0;
+                y++;
+            } else {
+                *(buffer + (y * SCREEN_WIDTH) + x) = c;
+                x++;
+                file_chars++;
+            }
+        }
+        fclose(fp);
+        return file_chars;
+    }
+}
+
+void open_file_prompt() {
     char file_name[SCREEN_WIDTH];
     FILE *fp;
+    int file_chars;
     
     printf("File: ");
     fgets(file_name, SCREEN_WIDTH, stdin);
@@ -307,42 +349,8 @@ void open_file() {
         strcpy(error, "file not found");
         file_exists = 0;
     } else {
-        file_exists = 1;
-        while ((c = fgetc(fp)) != EOF) { //Counts the file sixe for sizing of the buffer
-            if (c == '\n') {
-                file_lines++;
-                if (file_chars > longest_line) {
-                    longest_line = file_chars;
-                }
-            } else {
-                file_chars++;
-            }
-        }
-
-        file_chars = 0;
-        
-        if (longest_line > SCREEN_WIDTH) {
-            file_exists = 0;
-            strcpy(error, "file is wider than screen width");
-            printf("!\n");
-        } else {
-            lines = file_lines;
-            buffer = update_buffer(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
-            rewind(fp); //Rewinds the file for reading actual file contents
-            
-            while ((c = fgetc(fp)) != EOF) {
-                if (c == '\n') {
-                    x = 0;
-                    y++;
-                } else {
-                    *(buffer + (y * SCREEN_WIDTH) + x) = c;
-                    x++;
-                    file_chars++;
-                }
-            }
-            fclose(fp);
-            printf("%d\n", file_chars);
-        }
+        file_chars = open_file(fp);
+        printf("%d\n", file_chars);
     }
 }
 
@@ -509,11 +517,7 @@ int main(int argc, char *argv[]) {
     opterr = 0;
     
     int i;
-    int c;
-    int x;
-    int z;
-    int fileChars = 0;
-    int newLines = 0;
+    int file_chars = 0;
     char prompt = ':';
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
@@ -568,35 +572,8 @@ int main(int argc, char *argv[]) {
         if (fp == NULL) {
             printf(NEW_FILE);
         } else {
-            while ((c = fgetc(fp)) != EOF) {
-                if (c == '\n') {
-                    newLines++;
-                }
-            }
-            rewind(fp);
-            lines = newLines;
-            
-            new_buffer = (char *) realloc(buffer, (lines + 1) * SCREEN_WIDTH);
-            if (new_buffer == NULL) {
-                printf("Error: out of memory");
-                free(buffer);
-                exit(2);
-            }
-            buffer = new_buffer;
-            x = 0; //Line counter
-            z = 0; //Column counter
-            while ((c = fgetc(fp)) != EOF) {
-                if (c == '\n') {
-                    z = 0;
-                    x++;
-                } else {
-                    *(buffer + (x * SCREEN_WIDTH) + z) = c;
-                    z++;
-                    fileChars++;
-                }
-            }
-            fclose(fp);
-            printf("%d\n", fileChars);
+            file_chars = open_file(fp);
+            printf("%d\n", file_chars);
         }
     } else {
         file_exists = 0;
@@ -692,7 +669,7 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'o':
                         if (unsaved == 0) {
-                            open_file();
+                            open_file_prompt();
                         } else {
                             printf("!\n");
                             strcpy(error, "unsaved changes");
