@@ -185,9 +185,9 @@ void insert_line(char line[SCREEN_WIDTH], int current_line) {
 }
 
 void insert_lines(int current_line) {
-    int linesInputted = 0;
-    int inputSize = 0;
-    char inputLine[SCREEN_WIDTH];
+    int lines_inputted = 0;
+    int input_size = 0;
+    char input_line[SCREEN_WIDTH];
     char c;
     char *newInput;
     
@@ -200,16 +200,17 @@ void insert_lines(int current_line) {
     }
     
     while (1) {
-        fgets(inputLine, SCREEN_WIDTH, stdin);
+        fgets(input_line, SCREEN_WIDTH, stdin);
         
-        if (strcmp(inputLine, ".\n") == 0) {
+        if (strcmp(input_line, ".\n") == 0) {
             break;
-        } else if (strcmp(inputLine, "\n") == 0) {
-            inputLine[0] = '\0';
+        } else if (strcmp(input_line, "\n") == 0) {
+            input_line[0] = '\0';
         } else {
-            strtok(inputLine, "\n");
+            strtok(input_line, "\n");
         }
-        insert_line(inputLine, current_line);
+        insert_line(input_line, current_line + lines_inputted);
+        lines_inputted++;
     }
 }
 
