@@ -491,30 +491,9 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'W':
-                        printf("File: ");
-                        fgets(file_name, SCREEN_WIDTH, stdin);
-                        strtok(file_name, "\n"); //Removes the trailing newline
-                        fp = fopen(file_name, "w");
-                        if (fp == NULL) {
-                            printf("!\n");
-                            strcpy(error, "file not found");
-                            strcpy(file_name, "\0"); //Empties the file_name
-                        } else {
-                            file_exists = 1;
-                            fileChars = 0;
-                            for (x = 0; x < lines; x++) {
-                                for (z = 0; z < SCREEN_WIDTH - 1; z++) {
-                                    c = *(buffer + (x * SCREEN_WIDTH) + z);
-                                    if (c != 0) {
-                                        fputc(c, fp);
-                                        fileChars++;
-                                    }
-                                }
-                                fputc('\n', fp);
-                            }
-                            fclose(fp);
-                            printf("%d\n", fileChars);
-                            unsaved = 0;
+                        file_exists = 0;
+                        if (write_file() != 0) {
+                            strcpy(command_str, "");
                         }
                         break;
                     case 'o':
