@@ -224,7 +224,7 @@ void insert_lines(int current_line) {
 }
 
 void delete_line(int line) {
-    if (line >= 1 && line <= lines) {
+    if (line + 1 >= 1 && line + 1 <= lines) {
         if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
             memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
         }
@@ -235,6 +235,7 @@ void delete_line(int line) {
         }
         unsaved = 1;
     }
+    buffer = update_buffer(buffer, lines * SCREEN_WIDTH * sizeof(char));
 }
 
 void delete_lines(int start, int end) {
@@ -242,9 +243,9 @@ void delete_lines(int start, int end) {
     
     if (start + 1 <= lines && end + 1 <= lines && start + 1 >= 1 && end + 1 >= 1) {
         for (i = start; i <= end; i++) {
-            delete_line(i);
+            delete_line(start); //When we are deleting a line, the rest of the lines will be shifted down. Thus, each new line will appear at 'start'
         }
-    }
+    } 
 }
 
 int write_file_name(char file_name[SCREEN_WIDTH]) { //Returns -1 on error, the number of characters written otherwise
@@ -494,7 +495,7 @@ void copy_line(int line) {
     
     if (line + 1 >= 1 && line + 1 <= lines) {
         strcpy(copy_line, buffer + (line * SCREEN_WIDTH)); //Copies one line at a time to copyLine
-        copied = update_buffer(copied, copy_lines + 1 * SCREEN_WIDTH * sizeof(char));
+        copied = update_buffer(copied, (copy_lines + 1) * SCREEN_WIDTH * sizeof(char));
         strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
         copy_lines++;
     } else {
