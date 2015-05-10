@@ -445,16 +445,16 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
             if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) {
                 extralength = strlen(replacestr) - strlen(searchstr);
                 
-                bytes = SCREEN_WIDTH - (((replaceptr + strlen(searchstr)) - buffer) % SCREEN_WIDTH) - extralength;
-                to = (replaceptr + strlen(searchstr) - buffer) % SCREEN_WIDTH;
-                from = (replaceptr + strlen(searchstr) + extralength - buffer) % SCREEN_WIDTH;
+                from = (replaceptr + 1 - buffer) % SCREEN_WIDTH;
+                to = from + extralength;
+                bytes = SCREEN_WIDTH - ((replaceptr - buffer) % SCREEN_WIDTH) - extralength - 1;
                 
-                memmove(buffer + from + (line * SCREEN_WIDTH), buffer + to + (line * SCREEN_WIDTH), bytes);
+                memmove(buffer + to + (line * SCREEN_WIDTH), buffer + from + (line * SCREEN_WIDTH), bytes);
                 for (i = 0; i <= strlen(replacestr) && replacestr[i] != '\0'; i++) {
                     *(replaceptr + i) = replacestr[i];
                 }
 
-                lineoffset = strlen(replacestr) + (replaceptr - buffer);
+                lineoffset = strlen(replacestr) + ((replaceptr - buffer) % SCREEN_WIDTH);
             } else {
                 break;
             }
