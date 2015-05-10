@@ -310,7 +310,7 @@ int open_file(FILE *fp) {
     int longest_line = 0;
     
     file_exists = 1;
-    while ((c = fgetc(fp)) != EOF) { //Counts the file sixe for sizing of the buffer
+    while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
         if (c == '\n') {
             file_lines++;
             if (file_chars > longest_line) {
@@ -330,11 +330,14 @@ int open_file(FILE *fp) {
         return 0;
     } else {
         lines = file_lines;
+        free(buffer);
+        buffer = NULL; //Allows the buffer to be safely reallocated
         buffer = update_buffer(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Reallocates the buffer to the desired size
         rewind(fp); //Rewinds the file for reading actual file contents
         
         while ((c = fgetc(fp)) != EOF) {
             if (c == '\n') {
+                *(buffer + (y * SCREEN_WIDTH) + x) = '\0';
                 x = 0;
                 y++;
             } else {
