@@ -317,6 +317,7 @@ int open_file(FILE *fp) {
             if (file_chars > longest_line) {
                 longest_line = file_chars;
             }
+            file_chars = 0;
         } else {
             file_chars++;
         }
@@ -328,7 +329,7 @@ int open_file(FILE *fp) {
         file_exists = 0;
         strcpy(error, "file is wider than screen width");
         printf("!\n");
-        return 0;
+        return -1;
     } else {
         lines = file_lines;
         free(buffer);
@@ -367,7 +368,9 @@ void open_file_prompt() {
         file_exists = 0;
     } else {
         file_chars = open_file(fp);
-        printf("%d\n", file_chars);
+        if (file_chars >= 0) {
+            printf("%d\n", file_chars);
+        }
     }
 }
 
@@ -798,7 +801,7 @@ int main(int argc, char *argv[]) {
             printf(NEW_FILE);
         } else {
             file_chars = open_file(fp);
-            if (!e_flag) {
+            if (!e_flag && file_chars >= 0) {
                 printf("%d\n", file_chars);
             }
         }
