@@ -76,13 +76,14 @@ void print_usage(char *programName) {
 }
 
 void *update_buffer(void *buf, size_t size) {
-    void *new_buf = realloc(buf, size);
-    if (new_buf == NULL) {
-        fprintf(stderr, "Error: not enough memory");
-        free(buf);
-        exit(2);
+    if (size != 0) {
+        void *new_buf = realloc(buf, size);
+        if (new_buf == NULL) {
+            fprintf(stderr, "Error: not enough memory");
+            exit(2);
+        }
+        buf = new_buf;
     }
-    buf = new_buf;
     return buf;
 }
 
