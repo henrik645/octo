@@ -87,6 +87,17 @@ void *update_buffer(void *buf, size_t size) {
     return buf;
 }
 
+int count_in_str(const char *substr, const char *str) {
+    char *occurence = NULL;
+    int count = 0;
+
+    while ((occurence = strstr(str, substr)) != NULL) {;
+        str = occurence + strlen(substr);
+        count++;
+    }
+    return count;
+}
+
 void print_numbered_line(int line) {
     char lineContents[SCREEN_WIDTH];
     if (line + 1 > lines || line + 1 < 1) {
@@ -431,7 +442,7 @@ void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
     }
 }
 
-void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
+int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
     int i = 0;
     int lineoffset = 0;
     int extralength = 0;
@@ -443,6 +454,11 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
     if (line >= 0 && line + 1 <= lines) {
         while (1) {
             if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) {
+                if (count_in_str(searchstr, buffer + line * SCREEN_WIDTH) * (strlen(replacestr) - strlen(searchstr)) + strlen(buffer + line * SCREEN_WIDTH) > SCREEN_WIDTH - 1) { // One for the NULL string character
+                    printf("?\n");
+                    strcpy(error, "line width is not enough for replacing of all instances");
+                    return 0;
+                }
                 extralength = strlen(replacestr) - strlen(searchstr);
                 
                 from = (replaceptr + 1 - buffer) % SCREEN_WIDTH;
@@ -462,7 +478,9 @@ void search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCRE
     } else {
         printf("?\n");
         strcpy(error, "line out of range");
+        return 0;
     }
+    return 1;
 }
 
 void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
@@ -470,7 +488,9 @@ void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char
 
     if (start >= 0 && start < lines && start >= 0 && start < lines) {
         for (i = start; i <= end; i++) {
-            search_replace(i, searchstr, replacestr);
+            if (search_replace(i, searchstr, replacestr) == 0) {
+                break;
+            }
         }
     } else {
         printf("?\n");
@@ -746,7 +766,7 @@ int main(int argc, char *argv[]) {
     opterr = 0;
     
     strcpy(error, "");
-    
+
     while ((option = getopt(argc, argv, cmdopts)) != -1) {
         switch (option) {
             case 'p':
