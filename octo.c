@@ -709,9 +709,25 @@ void parse_commands(char *command_str) {
                     print_help();
                     break;
                 case 'f':
-                    printf("Search: ");
-                    fgets(searchstr, SCREEN_WIDTH, stdin);
-                    strtok(searchstr, "\n"); //Removes trailing newline
+                    // printf("Search: ");
+                    // fgets(searchstr, SCREEN_WIDTH, stdin);
+                    // strtok(searchstr, "\n"); //Removes trailing newline
+
+                    i += 2; //Winds past the 'f/'
+
+                    result = get_chars_until(command_str, i, '/', MAX_COMMAND_SIZE);
+
+                    if (result.result == NULL) {
+                        printf("?\n");
+                        strcpy(error, "search string needs to be specified");
+                        break;
+                    }
+
+                    i = result.new_begin_at;
+                    strcpy(searchstr, result.result);
+
+                    i++; //Winds past the final '/'
+
                     if (isRange == 1) {
                         find_in_range(range.start, range.end, searchstr);
                     } else {
