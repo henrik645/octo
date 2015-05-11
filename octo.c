@@ -39,6 +39,14 @@ struct range {
     int end;
 };
 
+/* Declares a struct get_chars with a new begin value and result pointer from return from
+   get_chars_until.
+ */
+struct get_chars {
+    int new_begin_at;
+    char *result;
+};
+
 struct number parseInt(char input[], int inputLength, int inputOffset);
 
 /* Returns -1 if no integer was found and the integer if it was found (only positive values) 
@@ -97,6 +105,26 @@ int count_in_str(const char *substr, const char *str) {
     }
     return count;
 }
+
+struct get_chars get_chars_until(char *string, int begin_at, char separator, int characters) {
+    int result_index = 0;
+    char *result_str = malloc((characters + 1) * sizeof(char)); //Needs extra space for the final null byte
+    struct get_chars result;
+    
+    if (begin_at > strlen(string)) {
+        result.result = NULL;
+        return result;
+    }
+    while (string[begin_at] != separator && strlen(string) - begin_at > 0) {
+        result_str[result_index++] = string[begin_at++];
+    }
+
+    result_str[result_index] = '\0';
+
+    result.new_begin_at = begin_at;
+    result.result = result_str;
+    return result;
+} 
 
 void print_numbered_line(int line) {
     char lineContents[SCREEN_WIDTH];
@@ -571,6 +599,7 @@ void parse_commands(char *command_str) {
     char replacestr[SCREEN_WIDTH];
     char command;
     struct number parsedNumber;
+    struct get_chars result;
     
     for (i = 0; i < strlen(command_str);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
         command = command_str[i];
@@ -690,12 +719,31 @@ void parse_commands(char *command_str) {
                     }
                     break;
                 case 's':
-                    printf("Search: ");
-                    fgets(searchstr, SCREEN_WIDTH, stdin);
-                    strtok(searchstr, "\n");
-                    printf("Replace: ");
-                    fgets(replacestr, SCREEN_WIDTH, stdin);
-                    strtok(replacestr, "\n");
+                    i += 2; //Winds past the 's/'
+
+                    result = get_chars_until(command_str, i, '/', MAX_COMMAND_SIZE);
+
+                    if (result.result == NULL) {
+                        printf("?\n");
+                        strcpy(error, "search string needs to be specified");
+                        break;
+                    }
+
+                    i = result.new_begin_at;
+                    strcpy(searchstr, result.result);
+
+                    i++; //Winds past the '/'
+
+                    result = get_chars_until(command_str, i, '/', MAX_COMMAND_SIZE);
+
+                    if (result.result == NULL) {
+                        printf("?\n");
+                        strcpy(error, "replace string needs to be specified");
+                        break;
+                    }
+
+                    i = result.new_begin_at;
+                    strcpy(replacestr, result.result);
 
                     if (isRange == 1) {
                         search_replace_range(range.start, range.end, searchstr, replacestr);
