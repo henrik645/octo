@@ -450,10 +450,14 @@ void print_help() {
 }
 
 void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
+    regex_t exp;
+
     if (line >= 0 && line < lines) {
-        if (strstr(buffer + (line * SCREEN_WIDTH), searchstr) != NULL) { //match was found
+        regcomp(&exp, searchstr, 0);
+        if (regexec(&exp, buffer + line * SCREEN_WIDTH, 0, NULL, 0) == 0) { //match was found
             printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
         }
+        regfree(&exp);
     } else {
         print_error("line out of range");
     }
