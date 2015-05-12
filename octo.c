@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <regex.h>
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
@@ -539,8 +540,16 @@ void select_all() {
 void set_surround() {
     isRange = 1;
     if (lines > SURROUND * 2) {
-        range.start = line - SURROUND;
-        range.end = line + SURROUND;
+        if (line < SURROUND) {
+            range.start = 0;
+            range.end = SURROUND * 2;
+        } else if ((lines - 1) - line < SURROUND) {
+            range.start = lines - (SURROUND * 2) - 1;
+            range.end = lines - 1;
+        } else {
+            range.start = line - SURROUND;
+            range.end = line + SURROUND;
+        }
     } else {
         select_all();
     }
