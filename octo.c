@@ -125,13 +125,22 @@ struct get_chars get_chars_until(char *string, int begin_at, char separator, int
     result.new_begin_at = begin_at;
     result.result = result_str;
     return result;
-} 
+}
+
+void print_error(char *msg) {
+    printf("?\n");
+    strcpy(error, msg);
+}
+
+void print_warning(char *msg) {
+    printf("!\n");
+    strcpy(error, msg);
+}
 
 void print_numbered_line(int line) {
     char lineContents[SCREEN_WIDTH];
     if (line + 1 > lines || line + 1 < 1) {
-        strcpy(error, "line entered is outside limits");
-        printf("?\n");
+        print_error("line entered is outside limits");
     } else {
         strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
         printf("%d\t%s\n", line + 1, lineContents);
@@ -141,8 +150,7 @@ void print_numbered_line(int line) {
 void print_numbered_lines(int start, int end) {
     int i;
     if (start + 1 > lines || end + 1 > lines || start < 0 || end < 0) {
-        strcpy(error, "range outside limits");
-        printf("?\n");
+        print_error("range outside limits");
     } else {
         for (i = start; i <= end; i++) {
             print_numbered_line(i);
@@ -155,8 +163,7 @@ void quit_program(void) {
         free(buffer); //Frees the text buffer
         exit(0); //Exits the program
     } else {
-        printf("!\n");
-        strcpy(error, "unsaved changes");
+        print_warning("unsaved changes");
     }
 }
 
@@ -176,7 +183,7 @@ void change_line(int line) {
         lines = line + 1;
         new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
         if (new_buffer == NULL) {
-            fprintf(stderr, "Error: out of memory");
+            fprintf(stderr, "print_error: out of memory");
             free(buffer);
             exit(2);
         }
@@ -198,8 +205,7 @@ void print_line(int line) {
     char lineContents[SCREEN_WIDTH];
     
     if (line + 1 > lines || line + 1 < 1) {
-        strcpy(error, "line entered is outside limits");
-        printf("?\n");
+        print_error("line entered is outside limits");
     } else {
         strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
         printf("%s\n", lineContents);
@@ -210,8 +216,7 @@ void print_lines(int start, int end) {
     int i;
     
     if (start + 1 > lines || end + 1 > lines || start < 0 || end < 0) {
-        strcpy(error, "range outside limits");
-        printf("?\n");
+        print_error("range outside limits");
     } else {
         for (i = start; i <= end; i++) {
             print_line(i);
@@ -227,7 +232,7 @@ void insert_line(char line[SCREEN_WIDTH], int current_line) {
     
     new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char)); //Deallocates the empty line
     if (new_buffer == NULL) {
-        fprintf(stderr, "Error deleting line");
+        fprintf(stderr, "print_error deleting line");
         free(buffer);
         exit(2);
     }
@@ -289,7 +294,7 @@ void delete_lines(int start, int end) {
     } 
 }
 
-int write_file_name(char file_name[SCREEN_WIDTH]) { //Returns -1 on error, the number of characters written otherwise
+int write_file_name(char file_name[SCREEN_WIDTH]) { //Returns -1 on print_error, the number of characters written otherwise
     int i = 0;
     int x = 0;
     int file_chars = 0;
@@ -297,7 +302,6 @@ int write_file_name(char file_name[SCREEN_WIDTH]) { //Returns -1 on error, the n
     
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL) {
-        strcpy(error, "could not open file for writing");
         return -1;
     }
     
@@ -321,7 +325,7 @@ int write_file_name(char file_name[SCREEN_WIDTH]) { //Returns -1 on error, the n
     return file_chars;
 }
 
-int write_file() { //Returns -1 on error, otherwise the amount of characters read
+int write_file() { //Returns -1 on print_error, otherwise the amount of characters read
     int file_chars;
     
     if (file_exists) {
@@ -367,8 +371,7 @@ int open_file(FILE *fp) {
     
     if (longest_line > SCREEN_WIDTH) {
         file_exists = 0;
-        strcpy(error, "file is wider than screen width");
-        printf("!\n");
+        print_warning("file is wider than screen width");
         return -1;
     } else {
         lines = file_lines;
@@ -403,8 +406,7 @@ void open_file_prompt() {
     strtok(file_name, "\n"); //Removes the trailing newline
     fp = fopen(file_name, "r");
     if (fp == NULL) {
-        printf("!\n");
-        strcpy(error, "file not found");
+        print_warning("file not found");
         file_exists = 0;
     } else {
         file_chars = open_file(fp);
@@ -422,8 +424,7 @@ void transpose_next(int line) {
         strcpy(buffer + ((line + 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
         strcpy(buffer + (line * SCREEN_WIDTH), templine);
     } else {
-        strcpy(error, "can't transpose last line");
-        printf("?\n");
+        print_error("can't transpose last line");
     }
     unsaved = 1;
 }
@@ -436,15 +437,13 @@ void transpose_previous(int line) {
         strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
         strcpy(buffer + (line * SCREEN_WIDTH), templine);
     } else {
-        strcpy(error, "can't transpose first line");
-        printf("?\n");
+        print_error("can't transpose first line");
     }
 }
 
 void print_help() {
     if (error[0] == '\0') {
-        strcpy(error, "no error found");
-        printf("?\n");
+        print_error("no error found");
     } else {
         printf("%s\n", error);
     }
@@ -456,8 +455,7 @@ void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
             printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
         }
     } else {
-        printf("?\n");
-        strcpy(error, "line out of range");
+        print_error("line out of range");
     }
 }
 
@@ -484,8 +482,7 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
         while (1) {
             if ((replaceptr = strstr(buffer + (line * SCREEN_WIDTH) + lineoffset, searchstr)) != NULL) {
                 if (count_in_str(searchstr, buffer + line * SCREEN_WIDTH) * (strlen(replacestr) - strlen(searchstr)) + strlen(buffer + line * SCREEN_WIDTH) > SCREEN_WIDTH - 1) { // One for the NULL string character
-                    printf("?\n");
-                    strcpy(error, "line width is not enough for replacing of all instances");
+                    print_error("line width is not enough for replacing of all instances");
                     return 0;
                 }
                 extralength = strlen(replacestr) - strlen(searchstr);
@@ -505,8 +502,7 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
             }
         }
     } else {
-        printf("?\n");
-        strcpy(error, "line out of range");
+        print_error("line out of range");
         return 0;
     }
     return 1;
@@ -522,8 +518,7 @@ void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char
             }
         }
     } else {
-        printf("?\n");
-        strcpy(error, "lines out of range");
+        print_error("lines out of range");
     }
 }
 
@@ -564,8 +559,7 @@ void copy_line(int line) {
         strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
         copy_lines++;
     } else {
-        printf("?\n");
-        strcpy(error, "line out of range");
+        print_error("line out of range");
     }
 }
 
@@ -577,8 +571,7 @@ void copy_line_range(int start, int end) {
             copy_line(i);
         }
     } else {
-        printf("?\n");
-        strcpy(error, "lines out of range");
+        print_error("lines out of range");
     }
 }
 
@@ -587,8 +580,7 @@ void paste(int line) {
     
     if (line + 1 >= 1 && line + 1 <= lines) {
         if (copied == NULL) {
-            printf("?\n");
-            strcpy(error, "clipboard empty");
+            print_error("clipboard empty");
         } else {
             for (i = 0; i < copy_lines; i++) {
                 insert_line(copied + i * SCREEN_WIDTH, line + 1 + i);
@@ -625,12 +617,10 @@ void parse_commands(char *command_str) {
                         range.start = parsedNumber.value - 1;
                         range.end = endNumber.value - 1;
                     } else {
-                        printf("?\n");
-                        strcpy(error, "range limits out of range");
+                        print_error("range limits out of range");
                     }
                 } else {
-                    strcpy(error, "wrongly formatted range");
-                    printf("?\n");
+                    print_error("wrongly formatted range");
                     break;
                 }
             } else {
@@ -704,8 +694,7 @@ void parse_commands(char *command_str) {
                     if (unsaved == 0) {
                         open_file_prompt();
                     } else {
-                        printf("!\n");
-                        strcpy(error, "unsaved changes");
+                        print_warning("unsaved changes");
                     }
                     break;
                 case 't':
@@ -723,8 +712,7 @@ void parse_commands(char *command_str) {
                     result = get_chars_until(command_str, i, '/', MAX_COMMAND_SIZE);
 
                     if (result.result == NULL) {
-                        printf("?\n");
-                        strcpy(error, "search string needs to be specified");
+                        print_error("search string needs to be specified");
                         break;
                     }
 
@@ -745,8 +733,7 @@ void parse_commands(char *command_str) {
                     result = get_chars_until(command_str, i, '/', MAX_COMMAND_SIZE);
 
                     if (result.result == NULL) {
-                        printf("?\n");
-                        strcpy(error, "search string needs to be specified");
+                        print_error("search string needs to be specified");
                         break;
                     }
 
@@ -758,8 +745,7 @@ void parse_commands(char *command_str) {
                     result = get_chars_until(command_str, i, '/', MAX_COMMAND_SIZE);
 
                     if (result.result == NULL) {
-                        printf("?\n");
-                        strcpy(error, "replace string needs to be specified");
+                        print_error("replace string needs to be specified");
                         break;
                     }
 
@@ -814,9 +800,8 @@ void parse_commands(char *command_str) {
                 case '\n':
                     break;
                 default:
-                    printf("?\n");
                     strcpy(command_str, ""); //Empties command_str, accepting no more commands after an error
-                    strcpy(error, "unknown command");
+                    print_error("unknown command");
                     break;
             }
             i++;
@@ -857,16 +842,16 @@ int main(int argc, char *argv[]) {
                 break;
             case '?':
                 if (optopt == 'p') {
-                    fprintf(stderr, "Error: 'p' requires an argument.\n");
+                    fprintf(stderr, "error: 'p' requires an argument.\n");
                     return 1;
                 } else if (optopt == 'e') {
-                    fprintf(stderr, "Error: 'e' requires an argument.\n");
+                    fprintf(stderr, "error: 'e' requires an argument.\n");
                     return 1;
                 } else if (isprint(optopt)) {
-                    fprintf(stderr, "Error: Unknown option -%c\n", optopt);
+                    fprintf(stderr, "error: Unknown option -%c\n", optopt);
                     return 1;
                 } else {
-                    fprintf(stderr, "Error: Unknown option.");
+                    fprintf(stderr, "error: Unknown option.");
                     return 1;
                 }
                 break;
