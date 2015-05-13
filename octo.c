@@ -84,6 +84,10 @@ void print_usage(char *programName) {
     printf(" -e: Sets command string\n");
 }
 
+void print_version() {
+    printf("octo v%s\n", VERSION);
+}
+
 void *update_buffer(void *buf, size_t size) {
     if (size != 0) {
         void *new_buf = realloc(buf, size);
@@ -864,6 +868,7 @@ int main(int argc, char *argv[]) {
                 return 0;
                 break;
             case 'v':
+                print_version();
                 printf("See http://github.com/henrik645/octo for more details.\n\n");
                 printf("Copyright 2015.\n");
                 printf("Licensed by the MIT License.\n");
@@ -894,7 +899,7 @@ int main(int argc, char *argv[]) {
     }
     
     if (!e_flag) {
-        printf("octo v%s\n", VERSION);
+        print_version();
     }
     
     if (argc - optind > 1) { //Too many arguments
