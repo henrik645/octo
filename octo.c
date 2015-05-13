@@ -20,7 +20,7 @@ char *new_buffer = NULL;
 int unsaved = 0; //Set to 1 when there are unsaved changes
 int file_exists = 0;
 char file_name[SCREEN_WIDTH];
-int isRange = 0;
+int is_range = 0;
 struct range range;
 char *copied = NULL; //Pointer to memory where copied sections of text are stored
 int copy_lines = 0; //How many lines are stored there
@@ -569,7 +569,7 @@ void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char
 
 void select_all() {
     if (lines > 0) {
-        isRange = 1;
+        is_range = 1;
         range.start = 0;
         range.end = lines - 1;
     } else {
@@ -578,7 +578,7 @@ void select_all() {
 }
 
 void set_surround() {
-    isRange = 1;
+    is_range = 1;
     if (line + 1 >= 1 && line + 1 <= lines) {
         if (lines > SURROUND * 2) {
             if (line < SURROUND) {
@@ -600,7 +600,7 @@ void set_surround() {
 }
 
 void set_last_line() {
-    isRange = 0;
+    is_range = 0;
     line = lines;
 }
 
@@ -667,7 +667,7 @@ void parse_commands(char *command_str) {
                 i = endNumber.size; //endNumber.size was already initialized to i beforehand
                 if (endNumber.value >= 0) {
                     if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines) {
-                        isRange = 1;
+                        is_range = 1;
                         range.start = parsedNumber.value - 1;
                         range.end = endNumber.value - 1;
                     } else {
@@ -678,7 +678,7 @@ void parse_commands(char *command_str) {
                     break;
                 }
             } else {
-                isRange = 0;
+                is_range = 0;
             }
             line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
         } else {
@@ -694,7 +694,7 @@ void parse_commands(char *command_str) {
                     quit_program();
                     break;
                 case 'n':
-                    if (isRange == 1) {
+                    if (is_range == 1) {
                         print_numbered_lines(range.start, range.end);
                     } else {
                         print_numbered_line(line);
@@ -707,7 +707,7 @@ void parse_commands(char *command_str) {
                     change_line(line);
                     break;
                 case 'p':
-                    if (isRange) {
+                    if (is_range) {
                         print_lines(range.start, range.end);
                     } else {
                         print_line(line);
@@ -717,7 +717,7 @@ void parse_commands(char *command_str) {
                     insert_lines(line);
                     break;
                 case 'd':
-                    if (isRange == 1) {
+                    if (is_range == 1) {
                         delete_lines(range.start, range.end);
                     } else {
                         delete_line(line);
@@ -775,7 +775,7 @@ void parse_commands(char *command_str) {
 
                     i++; //Winds past the final '/'
 
-                    if (isRange == 1) {
+                    if (is_range == 1) {
                         find_in_range(range.start, range.end, searchstr);
                     } else {
                         find_in_line(line, searchstr);
@@ -806,7 +806,7 @@ void parse_commands(char *command_str) {
                     i = result.new_begin_at;
                     strcpy(replacestr, result.result);
 
-                    if (isRange == 1) {
+                    if (is_range == 1) {
                         search_replace_range(range.start, range.end, searchstr, replacestr);
                     } else {
                         search_replace(line, searchstr, replacestr);
@@ -829,7 +829,7 @@ void parse_commands(char *command_str) {
                     free(copied);
                     copy_lines = 0;
                     copied = NULL;
-                    if (isRange == 1) {
+                    if (is_range == 1) {
                         copy_line_range(range.start, range.end);
                     } else {
                         copy_line(line);
@@ -839,7 +839,7 @@ void parse_commands(char *command_str) {
                     free(copied);
                     copy_lines = 0;
                     copied = NULL;
-                    if (isRange == 1) {
+                    if (is_range == 1) {
                         copy_line_range(range.start, range.end);
                         delete_lines(range.start, range.end);
                     } else {
