@@ -599,6 +599,11 @@ void set_surround() {
     }
 }
 
+void set_last_line() {
+    isRange = 0;
+    line = lines;
+}
+
 void copy_line(int line) {
     char copy_line[SCREEN_WIDTH];
     
@@ -816,6 +821,9 @@ void parse_commands(char *command_str) {
                     break;
                 case '&':
                     set_surround();
+                    break;
+                case '$':
+                    set_last_line();
                     break;
                 case 'z':
                     free(copied);
