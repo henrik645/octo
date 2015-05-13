@@ -24,6 +24,7 @@ int isRange = 0;
 struct range range;
 char *copied = NULL; //Pointer to memory where copied sections of text are stored
 int copy_lines = 0; //How many lines are stored there
+int e_flag = 0;
 
 /* Declares a struct number with a value and the number of chars it took up in string form
  * for return from parseInt function.
@@ -143,13 +144,21 @@ struct get_chars get_chars_until(char *string, int begin_at, char separator, int
 }
 
 void print_error(char *msg) {
-    printf("?\n");
-    strcpy(error, msg);
+    if (e_flag) {
+        printf("error: %s\n", msg);
+    } else {
+        printf("?\n");
+        strcpy(error, msg);
+    }
 }
 
 void print_warning(char *msg) {
-    printf("!\n");
-    strcpy(error, msg);
+    if (e_flag) {
+        printf("warning: %s\n", msg);
+    } else {
+        printf("!\n");
+        strcpy(error, msg);
+    }
 }
 
 void print_numbered_line(int line) {
@@ -851,7 +860,6 @@ int main(int argc, char *argv[]) {
     char option;
     char cmdopts[] = "p:hve:";
     char command_str[MAX_COMMAND_SIZE];
-    int e_flag = 0;
     FILE *fp;
     opterr = 0;
     
