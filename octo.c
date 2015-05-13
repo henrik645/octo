@@ -579,19 +579,23 @@ void select_all() {
 
 void set_surround() {
     isRange = 1;
-    if (lines > SURROUND * 2) {
-        if (line < SURROUND) {
-            range.start = 0;
-            range.end = SURROUND * 2;
-        } else if ((lines - 1) - line < SURROUND) {
-            range.start = lines - (SURROUND * 2) - 1;
-            range.end = lines - 1;
+    if (line + 1 >= 1 && line + 1 <= lines) {
+        if (lines > SURROUND * 2) {
+            if (line < SURROUND) {
+                range.start = 0;
+                range.end = SURROUND * 2;
+            } else if ((lines - 1) - line < SURROUND) {
+                range.start = lines - (SURROUND * 2) - 1;
+                range.end = lines - 1;
+            } else {
+                range.start = line - SURROUND;
+                range.end = line + SURROUND;
+            }
         } else {
-            range.start = line - SURROUND;
-            range.end = line + SURROUND;
+            select_all();
         }
     } else {
-        select_all();
+        print_error("line out of range");
     }
 }
 
