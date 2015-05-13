@@ -493,7 +493,6 @@ void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
 
 int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
     int i = 0;
-    int x = 0;
     int extralength = 0;
     int bytes;
     int to;
@@ -531,10 +530,10 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
                 bytes = SCREEN_WIDTH - (match.rm_so + extralength);
 
                 memmove(to + previous_match, from + previous_match, bytes);
-                for (x = 0; x < strlen(replacestr) && replacestr[i] != '\0'; x++) {
-                    *(match.rm_so + previous_match + x) = replacestr[x];
+                for (i = 0; i < strlen(replacestr) && replacestr[i] != '\0'; i++) {
+                    *(match.rm_so + previous_match + i) = replacestr[i];
                 }
-                previous_match += match.rm_eo; 
+                previous_match += match.rm_eo + 1; 
             }
             regfree(&exp);
         }
