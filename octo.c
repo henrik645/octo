@@ -456,7 +456,7 @@ void transpose_next(int line) {
 void transpose_previous(int line) {
     char templine[SCREEN_WIDTH];
     
-    if (line + 1 <= lines && line + 1 >= 1) {
+    if (line + 1 <= lines && line + 1 >= 2) {
         strcpy(templine, buffer + ((line - 1) * SCREEN_WIDTH));
         strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
         strcpy(buffer + (line * SCREEN_WIDTH), templine);
