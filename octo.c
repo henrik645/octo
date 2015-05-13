@@ -75,8 +75,8 @@ struct number parseInt(char input[], int inputLength, int inputOffset) {
     }
 }
 
-void print_usage(char *programName) {
-    printf("Usage: %s [options] [file_name]\n\n", programName);
+void print_usage(char *program_name) {
+    printf("Usage: %s [options] [file name]\n\n", program_name);
     printf("Options:\n");
     printf(" -h: Displays help\n");
     printf(" -p: Sets prompt\n");
