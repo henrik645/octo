@@ -443,7 +443,7 @@ void open_file_prompt() {
 void transpose_next(int line) {
     char templine[SCREEN_WIDTH];
     
-    if (line + 2 <= lines && line + 1 > 0) {
+    if (line + 2 <= lines && line + 1 >= 1) {
         strcpy(templine, buffer + ((line + 1) * SCREEN_WIDTH));
         strcpy(buffer + ((line + 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
         strcpy(buffer + (line * SCREEN_WIDTH), templine);
