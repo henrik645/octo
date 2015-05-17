@@ -708,7 +708,7 @@ void parse_commands(char *command_str) {
                 end_number = parse_int(command_str, MAX_NUMBER_LEN, i);
                 i = end_number.size; //endNumber.size was already initialized to i beforehand
                 if (end_number.value >= 0) {
-                    if (is_range_in_range(parsed_number.value, end_number.value)) {
+                    if (is_range_in_range(parsed_number.value - 1, end_number.value - 1)) { // Minus 1 since all representations of lines are shifted down one.
                         is_range = 1;
                         range.start = parsed_number.value - 1;
                         range.end = end_number.value - 1;
