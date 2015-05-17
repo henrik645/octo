@@ -425,8 +425,8 @@ int open_file(FILE *fp) {
     }
 }
 
-    char file_name[SCREEN_WIDTH];
 void open_file_prompt() {
+    char file_name[SCREEN_WIDTH];
     FILE *fp;
     int file_chars;
     
