@@ -609,6 +609,21 @@ void set_surround() {
     }
 }
 
+void set_surround_forward() {
+    is_range = 1;
+    if (line + 1 >= 1 && line + 1 <= lines) {
+        if (line + SURROUND * 2 > lines) {
+            range.start = line;
+            range.end = lines - 1;
+        } else {
+            range.start = line;
+            range.end = line + SURROUND * 2;
+        }
+    } else {
+        print_error("line out of range");
+    }
+}
+
 void set_last_line() {
     is_range = 0;
     line = lines;
@@ -836,6 +851,9 @@ void parse_commands(char *command_str) {
                     break;
                 case '$':
                     set_last_line();
+                    break;
+                case '#':
+                    set_surround_forward();
                     break;
                 case 'z':
                     free(copied);
