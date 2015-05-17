@@ -666,12 +666,13 @@ void parse_commands(char *command_str) {
                 struct number endNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
                 i = endNumber.size; //endNumber.size was already initialized to i beforehand
                 if (endNumber.value >= 0) {
-                    if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines) {
+                    if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines && parsedNumber.value <= endNumber.value) {
                         is_range = 1;
                         range.start = parsedNumber.value - 1;
                         range.end = endNumber.value - 1;
                     } else {
                         print_error("range limits out of range");
+                        strcpy(command_str, "");
                     }
                 } else {
                     print_error("wrongly formatted range");
