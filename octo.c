@@ -161,24 +161,40 @@ void print_warning(char *msg) {
     }
 }
 
+int is_line_in_range(int line) {
+    if (line + 1 >= 1 && line + 1 <= lines) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int is_range_in_range(int start, int end) {
+    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && end + 1 <= lines && start <= end) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void print_numbered_line(int line) {
     char lineContents[SCREEN_WIDTH];
-    if (line + 1 > lines || line + 1 < 1) {
-        print_error("line entered is outside limits");
-    } else {
+    if (is_line_in_range(line)) {
         strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
         printf("%d\t%s\n", line + 1, lineContents);
+    } else {
+        print_error("line entered is outside limits");
     }
 }
 
 void print_numbered_lines(int start, int end) {
     int i;
-    if (start + 1 > lines || end + 1 > lines || start < 0 || end < 0) {
-        print_error("range outside limits");
-    } else {
+    if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
             print_numbered_line(i);
         }
+    } else {
+        print_error("range outside limits");
     }
 }
 
@@ -228,23 +244,23 @@ void change_line(int line) {
 void print_line(int line) {
     char lineContents[SCREEN_WIDTH];
     
-    if (line + 1 > lines || line + 1 < 1) {
-        print_error("line entered is outside limits");
-    } else {
+    if (is_line_in_range(line)) {
         strcpy(lineContents, buffer + (line * SCREEN_WIDTH));
         printf("%s\n", lineContents);
+    } else {
+        print_error("line entered is outside limits");
     }
 }
 
 void print_lines(int start, int end) {
     int i;
     
-    if (start + 1 > lines || end + 1 > lines || start < 0 || end < 0) {
-        print_error("range outside limits");
-    } else {
+    if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
             print_line(i);
         }
+    } else {
+        print_error("range outside limits");
     }
 }
 
@@ -294,7 +310,7 @@ void insert_lines(int current_line) {
 }
 
 void delete_line(int line) {
-    if (line + 1 >= 1 && line + 1 <= lines) {
+    if (is_line_in_range(line)) {
         if (line + 1 < lines) { //Perform only if this isn't the last line (otherwise there's nothing to be shifted down
             memmove(buffer + (line * SCREEN_WIDTH), buffer + ((line + 1) * SCREEN_WIDTH), (lines - (line + 1)) * SCREEN_WIDTH * sizeof(char)); //Shifts down the memory
         }
@@ -311,7 +327,7 @@ void delete_line(int line) {
 void delete_lines(int start, int end) {
     int i;
     
-    if (start + 1 <= lines && end + 1 <= lines && start + 1 >= 1 && end + 1 >= 1) {
+    if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
             delete_line(start); //When we are deleting a line, the rest of the lines will be shifted down. Thus, each new line will appear at 'start'
         }
@@ -453,7 +469,7 @@ void open_file_prompt() {
 void transpose_next(int line) {
     char templine[SCREEN_WIDTH];
     
-    if (line + 2 <= lines && line + 1 >= 1) {
+    if (is_line_in_range(line + 1)) {
         strcpy(templine, buffer + ((line + 1) * SCREEN_WIDTH));
         strcpy(buffer + ((line + 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
         strcpy(buffer + (line * SCREEN_WIDTH), templine);
@@ -466,7 +482,7 @@ void transpose_next(int line) {
 void transpose_previous(int line) {
     char templine[SCREEN_WIDTH];
     
-    if (line + 1 <= lines && line + 1 >= 2) {
+    if (is_line_in_range(line - 1)) {
         strcpy(templine, buffer + ((line - 1) * SCREEN_WIDTH));
         strcpy(buffer + ((line - 1) * SCREEN_WIDTH), buffer + (line * SCREEN_WIDTH));
         strcpy(buffer + (line * SCREEN_WIDTH), templine);
@@ -486,7 +502,7 @@ void print_help() {
 void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
     regex_t exp;
 
-    if (line >= 0 && line < lines) {
+    if (is_line_in_range(line)) {
         if (regcomp(&exp, searchstr, 0) != 0) {
             print_error("malformed regular expression");
         } else {
@@ -503,7 +519,7 @@ void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
 void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
     int i = 0;
     
-    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && start + 1 <= lines) {
+    if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
             find_in_line(i, searchstr);
         }
@@ -523,7 +539,7 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
     regmatch_t matches[n_matches];
     regmatch_t match;
     
-    if (line >= 0 && line + 1 <= lines) {
+    if (is_line_in_range(line)) {
         if (regcomp(&exp, searchstr, 0) != 0) {
             print_error("malformed regular expression");
         } else {
@@ -566,7 +582,7 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
 void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
     int i = 0;
 
-    if (start >= 0 && start < lines && start >= 0 && start < lines) {
+    if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
             if (search_replace(i, searchstr, replacestr) == 0) {
                 break;
@@ -587,9 +603,9 @@ void select_all() {
     }
 }
 
-void set_surround() {
+void set_surround(int line) {
     is_range = 1;
-    if (line + 1 >= 1 && line + 1 <= lines) {
+    if (is_line_in_range(line)) {
         if (lines > SURROUND * 2) {
             if (line < SURROUND) {
                 range.start = 0;
@@ -609,9 +625,9 @@ void set_surround() {
     }
 }
 
-void set_surround_forward() {
+void set_surround_forward(int line) {
     is_range = 1;
-    if (line + 1 >= 1 && line + 1 <= lines) {
+    if (is_line_in_range(line)) {
         if (line + SURROUND * 2 > lines) {
             range.start = line;
             range.end = lines - 1;
@@ -632,7 +648,7 @@ void set_last_line() {
 void copy_line(int line) {
     char copy_line[SCREEN_WIDTH];
     
-    if (line + 1 >= 1 && line + 1 <= lines) {
+    if (is_line_in_range(line)) {
         strcpy(copy_line, buffer + (line * SCREEN_WIDTH)); //Copies one line at a time to copyLine
         copied = update_buffer(copied, (copy_lines + 1) * SCREEN_WIDTH * sizeof(char));
         strcpy(copied + (copy_lines * SCREEN_WIDTH), copy_line);
@@ -645,7 +661,7 @@ void copy_line(int line) {
 void copy_line_range(int start, int end) {
     int i;
     
-    if (start + 1 >= 1 && start + 1 <= lines && end + 1 >= 1 && end + 1 <= lines) {
+    if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
             copy_line(i);
         }
@@ -657,7 +673,7 @@ void copy_line_range(int start, int end) {
 void paste(int line) {
     int i;
     
-    if (line + 1 >= 1 && line + 1 <= lines) {
+    if (is_line_in_range(line)) {
         if (copied == NULL) {
             print_error("clipboard empty");
         } else {
@@ -692,7 +708,7 @@ void parse_commands(char *command_str) {
                 end_number = parse_int(command_str, MAX_NUMBER_LEN, i);
                 i = end_number.size; //endNumber.size was already initialized to i beforehand
                 if (end_number.value >= 0) {
-                    if (parsed_number.value >= 0 && parsed_number.value <= lines && end_number.value >= 0 && end_number.value <= lines && parsed_number.value <= end_number.value) {
+                    if (is_range_in_range(parsed_number.value, end_number.value)) {
                         is_range = 1;
                         range.start = parsed_number.value - 1;
                         range.end = end_number.value - 1;
@@ -709,7 +725,7 @@ void parse_commands(char *command_str) {
             }
             line = parsed_number.value - 1; //To account for the shifting (see above at initialization)
         } else {
-            if (line + 1 > lines || line + 1 < 1) {
+            if (!is_line_in_range(line)) {
                 if (lines == 0) {
                     line = lines;
                 } else {
@@ -847,13 +863,13 @@ void parse_commands(char *command_str) {
                     unsaved = 0;
                     break;
                 case '&':
-                    set_surround();
+                    set_surround(line);
                     break;
                 case '$':
                     set_last_line();
                     break;
                 case '#':
-                    set_surround_forward();
+                    set_surround_forward(line);
                     break;
                 case 'z':
                     free(copied);
