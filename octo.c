@@ -378,6 +378,11 @@ int open_file(FILE *fp) {
     int x = 0;
     int longest_line = 0;
     
+    if (fp == NULL) {
+        print_error("file not found");
+        return -1;
+    }
+    
     file_exists = 1;
     while ((c = fgetc(fp)) != EOF) { //Counts the file size for sizing of the buffer
         if (c == '\n') {
@@ -420,8 +425,8 @@ int open_file(FILE *fp) {
     }
 }
 
-void open_file_prompt() {
     char file_name[SCREEN_WIDTH];
+void open_file_prompt() {
     FILE *fp;
     int file_chars;
     
@@ -851,6 +856,13 @@ void parse_commands(char *command_str) {
                     break;
                 case 'v':
                     paste(line);
+                    break;
+                case 'r':
+                    if (file_exists) {
+                        open_file(fopen(file_name, "r"));
+                    } else {
+                        print_error("no file open");
+                    }
                     break;
                 case '\t':
                     break;
