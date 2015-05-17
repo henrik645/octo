@@ -435,8 +435,13 @@ void open_file_prompt() {
     strtok(file_name, "\n"); //Removes the trailing newline
     fp = fopen(file_name, "r");
     if (fp == NULL) {
-        print_warning("file not found");
-        file_exists = 0;
+        printf(NEW_FILE);
+        file_exists = 1;
+        free(buffer);
+        buffer = NULL;
+        lines = 0;
+        line = 0;
+        is_range = 0;
     } else {
         file_chars = open_file(fp);
         if (file_chars >= 0) {
