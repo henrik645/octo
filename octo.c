@@ -27,7 +27,7 @@ int copy_lines = 0; //How many lines are stored there
 int e_flag = 0;
 
 /* Declares a struct number with a value and the number of chars it took up in string form
- * for return from parseInt function.
+ * for return from parse_int function.
  */
 struct number {
     int value;
@@ -49,12 +49,12 @@ struct get_chars {
     char *result;
 };
 
-struct number parseInt(char input[], int inputLength, int inputOffset);
+struct number parse_int(char input[], int inputLength, int inputOffset);
 
 /* Returns -1 if no integer was found and the integer if it was found (only positive values) 
  * It utilises the fact that in ASCII, numbers from 0 to 9 comes after each other.
  */
-struct number parseInt(char input[], int inputLength, int inputOffset) {
+struct number parse_int(char input[], int inputLength, int inputOffset) {
     int cursor = inputOffset;
     int numCur = 0;
     char number[MAX_NUMBER_LEN] = {};
@@ -653,23 +653,24 @@ void parse_commands(char *command_str) {
     char searchstr[SCREEN_WIDTH];
     char replacestr[SCREEN_WIDTH];
     char command;
-    struct number parsedNumber;
+    struct number parsed_number;
+    struct number end_number;
     struct get_chars result;
     
     for (i = 0; i < strlen(command_str);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
         command = command_str[i];
-        parsedNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
-        if (parsedNumber.value >= 0) { //Input is number
-            i = parsedNumber.size; //parsedNumber.size was already initialized to i beforehand
+        parsed_number = parse_int(command_str, MAX_NUMBER_LEN, i);
+        if (parsed_number.value >= 0) { //Input is number
+            i = parsed_number.size; //parsed_number.size was already initialized to i beforehand
             if (command_str[i] == ',') {
                 i++; //Removes the ','
-                struct number endNumber = parseInt(command_str, MAX_NUMBER_LEN, i);
-                i = endNumber.size; //endNumber.size was already initialized to i beforehand
-                if (endNumber.value >= 0) {
-                    if (parsedNumber.value >= 0 && parsedNumber.value <= lines && endNumber.value >= 0 && endNumber.value <= lines && parsedNumber.value <= endNumber.value) {
+                end_number = parse_int(command_str, MAX_NUMBER_LEN, i);
+                i = end_number.size; //endNumber.size was already initialized to i beforehand
+                if (end_number.value >= 0) {
+                    if (parsed_number.value >= 0 && parsed_number.value <= lines && end_number.value >= 0 && end_number.value <= lines && parsed_number.value <= end_number.value) {
                         is_range = 1;
-                        range.start = parsedNumber.value - 1;
-                        range.end = endNumber.value - 1;
+                        range.start = parsed_number.value - 1;
+                        range.end = end_number.value - 1;
                     } else {
                         print_error("range limits out of range");
                         strcpy(command_str, "");
@@ -681,7 +682,7 @@ void parse_commands(char *command_str) {
             } else {
                 is_range = 0;
             }
-            line = parsedNumber.value - 1; //To account for the shifting (see above at initialization)
+            line = parsed_number.value - 1; //To account for the shifting (see above at initialization)
         } else {
             if (line + 1 > lines || line + 1 < 1) {
                 if (lines == 0) {
