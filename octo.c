@@ -704,6 +704,9 @@ void parse_commands(char *command_str) {
     struct number end_number;
     struct get_chars result;
     
+    if (strlen(command_str) == 0) {
+        quit_program();
+    }
     for (i = 0; i < strlen(command_str);) { //i is not incremented by loop but instead by the code below depending on if the command is a number or not
         command = command_str[i];
         parsed_number = parse_int(command_str, MAX_NUMBER_LEN, i);
