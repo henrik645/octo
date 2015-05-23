@@ -499,12 +499,13 @@ void print_help() {
     }
 }
 
-void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
+int find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
     regex_t exp;
 
     if (is_line_in_range(line)) {
         if (regcomp(&exp, searchstr, 0) != 0) {
             print_error("malformed regular expression");
+            return 0;
         } else {
             if (regexec(&exp, buffer + line * SCREEN_WIDTH, 0, NULL, 0) == 0) { //match was found
                 printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
@@ -513,7 +514,9 @@ void find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
         }
     } else {
         print_error("line out of range");
+        return 0;
     }
+    return 1;
 }
 
 void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
@@ -521,7 +524,9 @@ void find_in_range(int start, int end, char searchstr[SCREEN_WIDTH]) {
     
     if (is_range_in_range(start, end)) {
         for (i = start; i <= end; i++) {
-            find_in_line(i, searchstr);
+            if (find_in_line(i, searchstr) == 0) {
+                break;
+            }
         }
     }
 }
@@ -542,6 +547,7 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
     if (is_line_in_range(line)) {
         if (regcomp(&exp, searchstr, 0) != 0) {
             print_error("malformed regular expression");
+            return 0;	
         } else {
             while (1) {
                 nomatch = regexec(&exp, previous_match, n_matches, matches, 0);
