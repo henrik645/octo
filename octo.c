@@ -145,7 +145,7 @@ struct get_chars get_chars_until(char *string, int begin_at, char separator, int
 
 void print_error(char *msg) {
     if (e_flag) {
-        printf("error: %s\n", msg);
+        fprintf(stderr, "error: %s\n", msg);
     } else {
         printf("?\n");
         strcpy(error, msg);
@@ -154,7 +154,7 @@ void print_error(char *msg) {
 
 void print_warning(char *msg) {
     if (e_flag) {
-        printf("warning: %s\n", msg);
+        fprintf(stderr, "warning: %s\n", msg);
     } else {
         printf("!\n");
         strcpy(error, msg);
