@@ -6,7 +6,7 @@
 #include <regex.h>
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
-#define SCREEN_WIDTH 320
+#define SCREEN_WIDTH 80
 #define VERSION "0.3"
 #define NEW_FILE "new file\n"
 #define SURROUND 10
