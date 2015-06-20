@@ -914,10 +914,14 @@ void parse_commands(char *command_str) {
                     paste(line);
                     break;
                 case 'r':
-                    if (file_exists) {
-                        open_file(fopen(file_name, "r"));
+                    if (unsaved == 0) {
+                        if (file_exists) {
+                            open_file(fopen(file_name, "r"));
+                        } else {
+                            print_error("no file open");
+                        }
                     } else {
-                        print_error("no file open");
+                        print_warning("unsaved changes");
                     }
                     break;
                 case '\t':
