@@ -549,41 +549,48 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
     if (is_line_in_range(line)) {
         if (regcomp(&exp, searchstr, 0) != 0) {
             print_error("malformed regular expression");
-            return 0;	
+            goto cleanup0;
         } else {
             while (1) {
                 nomatch = regexec(&exp, current_match, 1, matches, 0);
                 if (nomatch) {
-                    return 1;
+                    goto cleanup1;
                 }
                 match = matches[0];
                 start = match.rm_so;
                 end = match.rm_eo;
 
+                if (count_in_str(searchstr, buffer + line * SCREEN_WIDTH) * (strlen(replacestr) - match_length) + strlen(buffer + line * SCREEN_WIDTH) > SCREEN_WIDTH) {
+                    print_error("Line width not enough for replacing of all instances");
+                    goto cleanup0;
+                }
+
                 match_length = end - start;
                 extralength = strlen(replacestr) - match_length;
-                move_characters = SCREEN_WIDTH - end;
+                move_characters = SCREEN_WIDTH - end - (current_match - (buffer + line * SCREEN_WIDTH));
 
-                if (strlen(buffer + line * SCREEN_WIDTH) + extralength > SCREEN_WIDTH) {
-                    print_error("Line width not enough for replacing of all instances");
-                    return 0;
-                } else {
-                    if (extralength < 0) {
-                        memmove(current_match + start + strlen(replacestr), current_match + end, move_characters);
-                    } else {
-                        memmove(current_match + start + strlen(replacestr), current_match + end, move_characters - extralength - start);
-                    }
-                    for (i = 0; i < strlen(replacestr); i++) {
-                        *(current_match + start + i) = replacestr[i];
-                    }
-                    current_match += strlen(replacestr) + 1; // Plus one so it goes past the final character
+                if (extralength < 0) {
+                    memmove(current_match + start + strlen(replacestr), current_match + end, move_characters);
+                } else if (extralength > 0) {
+                    memmove(current_match + start + strlen(replacestr), current_match + end, move_characters - extralength - start);
                 }
+                for (i = 0; i < strlen(replacestr); i++) {
+                    *(current_match + start + i) = replacestr[i];
+                }
+                current_match += start + strlen(replacestr);
             }
         }
     } else {
         print_error("line out of range");
-        return 0;
+        goto cleanup0;
     }
+
+    cleanup0:
+        regfree(&exp);
+        return 0;
+    cleanup1:
+        regfree(&exp);
+        return 1;
 }
 
 void search_replace_range(int start, int end, char searchstr[SCREEN_WIDTH], char replacestr[SCREEN_WIDTH]) {
