@@ -559,13 +559,13 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
                 match = matches[0];
                 start = match.rm_so;
                 end = match.rm_eo;
+                match_length = end - start;
 
                 if (count_in_str(searchstr, buffer + line * SCREEN_WIDTH) * (strlen(replacestr) - match_length) + strlen(buffer + line * SCREEN_WIDTH) > SCREEN_WIDTH) {
                     print_error("Line width not enough for replacing of all instances");
                     goto cleanup0;
                 }
 
-                match_length = end - start;
                 extralength = strlen(replacestr) - match_length;
                 move_characters = SCREEN_WIDTH - end - (current_match - (buffer + line * SCREEN_WIDTH));
 
