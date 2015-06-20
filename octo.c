@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -692,7 +693,7 @@ void paste(int line, int before) {
             print_error("clipboard empty");
         } else {
             for (i = 0; i < copy_lines; i++) {
-                insert_line(copied + i * SCREEN_WIDTH, line + (before ? 1 : 0) + i);
+                insert_line(copied + i * SCREEN_WIDTH, line + (before ? 0 : 1) + i);
             }
         }
     }
