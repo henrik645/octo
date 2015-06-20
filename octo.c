@@ -7,7 +7,7 @@
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
 #define SCREEN_WIDTH 80
-#define VERSION "0.3"
+#define VERSION "1.0"
 #define NEW_FILE "new file\n"
 #define SURROUND 10
 /* The number of lines in each direction the surround command prints out */
