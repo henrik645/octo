@@ -684,7 +684,7 @@ void copy_line_range(int start, int end) {
     }
 }
 
-void paste(int line) {
+void paste(int line, int before) {
     int i;
     
     if (is_line_in_range(line)) {
@@ -692,7 +692,7 @@ void paste(int line) {
             print_error("clipboard empty");
         } else {
             for (i = 0; i < copy_lines; i++) {
-                insert_line(copied + i * SCREEN_WIDTH, line + 1 + i);
+                insert_line(copied + i * SCREEN_WIDTH, line + (before ? 1 : 0) + i);
             }
         }
     }
@@ -911,7 +911,10 @@ void parse_commands(char *command_str) {
                     }
                     break;
                 case 'v':
-                    paste(line);
+                    paste(line, 0);
+                    break;
+                case 'V':
+                    paste(line, 1);
                     break;
                 case 'r':
                     if (unsaved == 0) {
