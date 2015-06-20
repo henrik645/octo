@@ -800,7 +800,7 @@ void parse_commands(char *command_str) {
                     break;
                 case 'W':
                     file_exists = 0;
-                    if (write_file() != 0) {
+                    if (write_file() == -1) {
                         strcpy(command_str, "");
                     }
                     break;
