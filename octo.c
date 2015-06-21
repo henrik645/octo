@@ -556,6 +556,10 @@ int search_replace(int line, char searchstr[SCREEN_WIDTH], char replacestr[SCREE
                 end = match.rm_eo;
                 match_length = end - start;
 
+                if (match_length == 0) {
+                    return 1; //The algorithm will get stuck on zero-length matches such as '$' and '^'
+                }
+
                 if (count_in_str(searchstr, buffer + line * SCREEN_WIDTH) * (strlen(replacestr) - match_length) + strlen(buffer + line * SCREEN_WIDTH) > SCREEN_WIDTH) {
                     print_error("Line width not enough for replacing of all instances");
                     goto cleanup0;
