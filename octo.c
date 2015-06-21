@@ -7,7 +7,7 @@
 #include <regex.h>
 #define MAX_COMMAND_SIZE 256
 #define MAX_NUMBER_LEN 8
-#define SCREEN_WIDTH 80
+#define SCREEN_WIDTH 320
 #define VERSION "1.0"
 #define NEW_FILE "new file\n"
 #define SURROUND 10
@@ -222,13 +222,7 @@ void change_line(int line) {
     
     if (line + 1 > lines) {
         lines = line + 1;
-        new_buffer = realloc(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
-        if (new_buffer == NULL) {
-            fprintf(stderr, "print_error: out of memory");
-            free(buffer);
-            exit(2);
-        }
-        buffer = new_buffer;
+        new_buffer = update_buffer(buffer, (lines + 1) * SCREEN_WIDTH * sizeof(char));
     }
     fgets(lineContents, SCREEN_WIDTH, stdin);
     if (strcmp(lineContents, "\n") == 0) {
