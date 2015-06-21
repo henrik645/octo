@@ -503,7 +503,7 @@ int find_in_line(int line, char searchstr[SCREEN_WIDTH]) {
             return 0;
         } else {
             if (regexec(&exp, buffer + line * SCREEN_WIDTH, 0, NULL, 0) == 0) { //match was found
-                printf("%d\t%s\n", line + 1, buffer + (line * SCREEN_WIDTH));
+                print_numbered_line(line);
             }
             regfree(&exp);
         }
