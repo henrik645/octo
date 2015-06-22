@@ -870,6 +870,7 @@ void parse_commands(char *command_str) {
                     } else {
                         search_replace(line, searchstr, replacestr);
                     }
+                    i++;
                     unsaved = 1;
                     break;
                 case '@':
