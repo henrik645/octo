@@ -799,8 +799,11 @@ void parse_commands(char *command_str) {
                     break;
                 case 'W':
                     file_exists = 0;
-                    if (write_file() == -1) {
+                    file_chars = write_file();
+                    if (file_chars == -1) {
                         strcpy(command_str, "");
+                    } else {
+                        printf("%d\n", file_chars);
                     }
                     break;
                 case 'o':
